@@ -5,16 +5,21 @@
  * to the browser over HTTPS, preventing mixed-content blocking when the
  * Xtream IPTV server serves images over plain HTTP.
  *
- * Usage:  GET /.netlify/functions/image?url=<encoded-image-url>
+ * IPTV providers commonly host cover images on servers that are entirely
+ * separate from the main API host (different CDNs, image servers, etc.),
+ * so any host-based allowlist would block legitimate images. Instead the
+ * proxy is secured by:
+ *   - Blocking requests to private/loopback IP ranges (SSRF protection)
+ *   - Only forwarding responses with an image/* Content-Type
+ *   - Only accepting GET / HEAD requests
  *
- * Security:
- *   - Only HTTP/HTTPS URLs are accepted.
- *   - When XTREAM_SERVER_URL is set, only URLs on that same host are proxied
- *     (prevents using this as an open proxy for arbitrary hosts).
- *   - Only image/* Content-Types are forwarded.
+ * Usage:  GET /.netlify/functions/image?url=<encoded-image-url>
  */
 
 const TIMEOUT_MS = 10_000;
+
+// IPv4 private / loopback / link-local ranges (SSRF guard)
+const PRIVATE_IP_RE = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.)/;
 
 export default async function handler(req) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -40,17 +45,14 @@ export default async function handler(req) {
     return new Response(null, { status: 400 });
   }
 
-  // ── 2. Host allowlist — only proxy images from the configured IPTV server ─
-  const serverUrl = process.env.XTREAM_SERVER_URL ?? '';
-  if (serverUrl) {
-    try {
-      const allowedHost = new URL(normalizeServerUrl(serverUrl)).host;
-      if (parsed.host !== allowedHost) {
-        return new Response(null, { status: 403 });
-      }
-    } catch {
-      // If XTREAM_SERVER_URL is malformed, fall through (log in production monitoring)
-    }
+  // ── 2. SSRF guard — block private / loopback hosts ───────────────────────
+  const hostname = parsed.hostname;
+  if (
+    hostname === 'localhost' ||
+    hostname === '::1' ||
+    PRIVATE_IP_RE.test(hostname)
+  ) {
+    return new Response(null, { status: 403 });
   }
 
   // ── 3. Fetch image from upstream ─────────────────────────────────────────
@@ -95,11 +97,3 @@ export default async function handler(req) {
   }
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function normalizeServerUrl(raw) {
-  const trimmed = raw.trim().replace(/\/+$/, '');
-  return trimmed.startsWith('http://') || trimmed.startsWith('https://')
-    ? trimmed
-    : `http://${trimmed}`;
-}
