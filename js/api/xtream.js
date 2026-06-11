@@ -5,7 +5,21 @@
  * The client sends only { pin, action, ...extraParams }.
  * Xtream server credentials live exclusively in Netlify env vars — never
  * in the client or localStorage.
+ *
+ * Responses are cached in memory with a TTL:
+ *   - List data  (categories, streams, series): CACHE_TTL_LONG  (30 min)
+ *   - Detail data (vod_info, series_info):      CACHE_TTL_SHORT (10 min)
+ *
+ * Call clearApiCache() to purge all cached responses (e.g. on user request).
  */
+
+import {
+  cacheGet,
+  cacheSet,
+  cacheClear,
+  CACHE_TTL_LONG,
+  CACHE_TTL_SHORT,
+} from '../utils/cache.js';
 
 const ENDPOINT = '/.netlify/functions/xtream';
 
@@ -44,41 +58,89 @@ async function callBff(payload) {
   return data;
 }
 
+/**
+ * Generic cache-aside wrapper for BFF calls.
+ * @param {string}   key     Cache key
+ * @param {object}   payload BFF request payload
+ * @param {number}   ttl     TTL in ms
+ * @param {boolean}  [force] Skip cache and overwrite on fetch
+ */
+async function cachedCallBff(key, payload, ttl, force = false) {
+  if (!force) {
+    const hit = cacheGet(key);
+    if (hit !== undefined) return hit;
+  }
+  const data = await callBff(payload);
+  cacheSet(key, data, ttl);
+  return data;
+}
+
+// ─── Cache management ─────────────────────────────────────────────────────────
+
+/**
+ * Purge all cached API responses.
+ * Call this when the user explicitly requests a cache refresh.
+ */
+export function clearApiCache() {
+  cacheClear();
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 // Each function receives `pin` as a string.
+// `authenticate` is intentionally NOT cached (security-sensitive).
 
 export async function authenticate(pin) {
   return callBff({ pin, action: 'authenticate' });
 }
 
 export async function getVodCategories(pin) {
-  return callBff({ pin, action: 'get_vod_categories' });
+  return cachedCallBff(
+    'vod_categories',
+    { pin, action: 'get_vod_categories' },
+    CACHE_TTL_LONG,
+  );
 }
 
 export async function getSeriesCategories(pin) {
-  return callBff({ pin, action: 'get_series_categories' });
+  return cachedCallBff(
+    'series_categories',
+    { pin, action: 'get_series_categories' },
+    CACHE_TTL_LONG,
+  );
 }
 
 export async function getVodStreams(pin, categoryId = '') {
-  return callBff({
-    pin,
-    action: 'get_vod_streams',
-    ...(categoryId ? { category_id: categoryId } : {}),
-  });
+  const key = `vod_streams:${categoryId}`;
+  return cachedCallBff(
+    key,
+    { pin, action: 'get_vod_streams', ...(categoryId ? { category_id: categoryId } : {}) },
+    CACHE_TTL_LONG,
+  );
 }
 
 export async function getSeries(pin, categoryId = '') {
-  return callBff({
-    pin,
-    action: 'get_series',
-    ...(categoryId ? { category_id: categoryId } : {}),
-  });
+  const key = `series:${categoryId}`;
+  return cachedCallBff(
+    key,
+    { pin, action: 'get_series', ...(categoryId ? { category_id: categoryId } : {}) },
+    CACHE_TTL_LONG,
+  );
 }
 
 export async function getVodInfo(pin, vodId) {
-  return callBff({ pin, action: 'get_vod_info', vod_id: vodId });
+  const key = `vod_info:${vodId}`;
+  return cachedCallBff(
+    key,
+    { pin, action: 'get_vod_info', vod_id: vodId },
+    CACHE_TTL_SHORT,
+  );
 }
 
 export async function getSeriesInfo(pin, seriesId) {
-  return callBff({ pin, action: 'get_series_info', series_id: seriesId });
+  const key = `series_info:${seriesId}`;
+  return cachedCallBff(
+    key,
+    { pin, action: 'get_series_info', series_id: seriesId },
+    CACHE_TTL_SHORT,
+  );
 }

@@ -53,6 +53,29 @@ export async function initSeriesView(pin, store) {
   loadCategory('', store);
 }
 
+/**
+ * Re-fetches categories and the currently selected category without
+ * re-attaching any event listeners. Used after a cache purge.
+ */
+export async function reloadSeriesView(store) {
+  const categorySelect = document.getElementById('series-category');
+  const searchInput    = document.getElementById('series-search');
+  const prevCategory   = categorySelect.value;
+
+  try {
+    const cats = await getSeriesCategories(_pin);
+    populateCategorySelect(categorySelect, cats);
+    if (prevCategory) categorySelect.value = prevCategory;
+  } catch (err) {
+    showError('series', err.message);
+  }
+
+  _query = '';
+  searchInput.value = '';
+  _page = 1;
+  await loadCategory(categorySelect.value, store);
+}
+
 async function loadCategory(categoryId, store) {
   setLoading('series', true);
   clearError('series');
