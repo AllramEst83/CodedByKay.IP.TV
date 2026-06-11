@@ -23,6 +23,26 @@ import {
 
 const ENDPOINT = '/.netlify/functions/xtream';
 
+// ─── Genre cache ──────────────────────────────────────────────────────────────
+// Maps item id (string) → raw genre string (e.g. "Drama, Action").
+// Lives for the whole session; cleared together with the API cache.
+
+const _genreMap = new Map();
+
+/**
+ * Return the cached genre string for a given item id, or null if unknown.
+ * @param {string|number} itemId
+ * @returns {string|null}
+ */
+export function getGenreForItem(itemId) {
+  return _genreMap.get(String(itemId)) ?? null;
+}
+
+/** Clear the in-memory genre cache. */
+function clearGenreCache() {
+  _genreMap.clear();
+}
+
 /**
  * Low-level fetch wrapper.
  * @param {object} payload  Must include `pin` and `action`.
@@ -78,11 +98,12 @@ async function cachedCallBff(key, payload, ttl, force = false) {
 // ─── Cache management ─────────────────────────────────────────────────────────
 
 /**
- * Purge all cached API responses.
+ * Purge all cached API responses and the genre cache.
  * Call this when the user explicitly requests a cache refresh.
  */
 export function clearApiCache() {
   cacheClear();
+  clearGenreCache();
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -129,18 +150,89 @@ export async function getSeries(pin, categoryId = '') {
 
 export async function getVodInfo(pin, vodId) {
   const key = `vod_info:${vodId}`;
-  return cachedCallBff(
+  const data = await cachedCallBff(
     key,
     { pin, action: 'get_vod_info', vod_id: vodId },
     CACHE_TTL_SHORT,
   );
+  const genre = data?.info?.genre;
+  if (genre?.trim()) _genreMap.set(String(vodId), genre.trim());
+  return data;
 }
 
 export async function getSeriesInfo(pin, seriesId) {
   const key = `series_info:${seriesId}`;
-  return cachedCallBff(
+  const data = await cachedCallBff(
     key,
     { pin, action: 'get_series_info', series_id: seriesId },
     CACHE_TTL_SHORT,
   );
+  const genre = data?.info?.genre;
+  if (genre?.trim()) _genreMap.set(String(seriesId), genre.trim());
+  return data;
+}
+
+// ─── Genre prefetch ───────────────────────────────────────────────────────────
+
+/**
+ * Batch-prefetch genre data for a list of items in the background.
+ * Fetches detail info (via the existing cached API) for items not yet in the
+ * genre map, processes up to `maxItems` items, and calls `onProgress` after
+ * each completed item so the caller can update the UI incrementally.
+ *
+ * @param {string}   pin
+ * @param {object[]} items
+ * @param {'vod'|'series'} type
+ * @param {object}   [opts]
+ * @param {number}   [opts.concurrency=5]  Parallel requests per batch
+ * @param {number}   [opts.maxItems=300]   Cap on total items to process
+ * @param {Function} [opts.onProgress]     Called as (loadedCount, totalCount)
+ * @param {AbortSignal} [opts.signal]      Cancel signal
+ */
+export async function prefetchGenres(pin, items, type, {
+  concurrency = 5,
+  maxItems = 300,
+  onProgress,
+  signal,
+} = {}) {
+  const limited = items.slice(0, maxItems);
+
+  // Skip items whose genre is already in the cache
+  const pending = limited.filter(item => {
+    const id = _itemId(item, type);
+    return id != null && !_genreMap.has(String(id));
+  });
+
+  const total = pending.length;
+  let loaded = 0;
+
+  for (let i = 0; i < pending.length; i += concurrency) {
+    if (signal?.aborted) break;
+
+    const batch = pending.slice(i, i + concurrency);
+
+    await Promise.allSettled(batch.map(async (item) => {
+      if (signal?.aborted) return;
+      const id = _itemId(item, type);
+      if (id == null) return;
+      try {
+        if (type === 'vod') await getVodInfo(pin, id);
+        else await getSeriesInfo(pin, id);
+      } catch {
+        // Ignore individual failures — the item just won't have a genre
+      }
+      loaded++;
+      onProgress?.(loaded, total);
+    }));
+
+    // Brief pause between batches to keep API load gentle
+    if (i + concurrency < pending.length && !signal?.aborted) {
+      await new Promise(r => setTimeout(r, 80));
+    }
+  }
+}
+
+function _itemId(item, type) {
+  if (type === 'vod') return item.stream_id ?? item.vod_id ?? item.id ?? null;
+  return item.series_id ?? item.id ?? null;
 }

@@ -139,7 +139,7 @@ function renderModalContent(container, { title, poster, backdrop, rating, year, 
         <div class="modal-meta-row">
           ${rating_num > 0 ? `<span class="modal-badge rating">${STAR_SVG} ${rating_num.toFixed(1)}</span>` : ''}
           ${year ? `<span class="modal-badge">${escapeHtml(year)}</span>` : ''}
-          ${genre ? `<span class="modal-badge">${escapeHtml(genre)}</span>` : ''}
+          ${genre ? genre.split(',').map(g => g.trim()).filter(Boolean).map(g => `<span class="modal-badge">${escapeHtml(g)}</span>`).join('') : ''}
           ${director ? `<span class="modal-badge">Regi: ${escapeHtml(director)}</span>` : ''}
         </div>
         ${plot ? `<p class="modal-plot">${escapeHtml(plot)}</p>` : ''}
