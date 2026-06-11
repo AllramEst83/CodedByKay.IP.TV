@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPTV Hub</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+  <!-- ========== LOGIN SCREEN ========== -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="48" height="48" rx="12" fill="var(--accent)"/>
+          <path d="M14 16L24 24L14 32V16Z" fill="white"/>
+          <rect x="26" y="16" width="8" height="16" rx="2" fill="white"/>
+        </svg>
+        <span>IPTV Hub</span>
+      </div>
+      <h1>Anslut till din leverantör</h1>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="server-url">Server URL</label>
+          <input
+            id="server-url"
+            type="url"
+            placeholder="http://server.com:8080"
+            autocomplete="url"
+            required
+          />
+        </div>
+        <div class="field">
+          <label for="username">Användarnamn</label>
+          <input
+            id="username"
+            type="text"
+            placeholder="username"
+            autocomplete="username"
+            required
+          />
+        </div>
+        <div class="field">
+          <label for="password">Lösenord</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <p id="login-error" class="error-msg" role="alert" hidden></p>
+        <button type="submit" id="login-btn" class="btn btn-primary btn-full">
+          <span class="btn-label">Anslut</span>
+          <span class="btn-spinner" hidden aria-hidden="true"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP ========== -->
+  <div id="app" class="app" hidden>
+    <header class="app-header">
+      <div class="header-brand">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="48" height="48" rx="12" fill="var(--accent)"/>
+          <path d="M14 16L24 24L14 32V16Z" fill="white"/>
+          <rect x="26" y="16" width="8" height="16" rx="2" fill="white"/>
+        </svg>
+        <span class="brand-name">IPTV Hub</span>
+      </div>
+      <nav class="main-nav" role="navigation" aria-label="Primär navigation">
+        <button class="nav-btn is-active" data-view="movies" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 4v16M17 4v16M2 12h20M2 8h5M17 8h5M2 16h5M17 16h5"/></svg>
+          Filmer
+        </button>
+        <button class="nav-btn" data-view="series" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 2l-4 5-4-5"/><path d="M12 12v5"/><path d="M9.5 14.5l2.5-2.5 2.5 2.5"/></svg>
+          Serier
+        </button>
+        <button class="nav-btn" data-view="lists" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          Mina Listor
+        </button>
+      </nav>
+      <button id="logout-btn" class="btn btn-ghost btn-sm" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logga ut
+      </button>
+    </header>
+
+    <main class="app-main">
+      <!-- MOVIES VIEW -->
+      <section id="view-movies" class="view is-active" aria-label="Filmer">
+        <div class="view-toolbar">
+          <div class="toolbar-left">
+            <select id="movies-category" class="select" aria-label="Välj filmkategori">
+              <option value="">Alla kategorier</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <div class="search-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="movies-search" type="search" class="search-input" placeholder="Sök filmer…" aria-label="Sök filmer" />
+            </div>
+            <select id="movies-sort" class="select select-sm" aria-label="Sortera filmer">
+              <option value="name">Namn A–Ö</option>
+              <option value="rating">Betyg (högst)</option>
+              <option value="added">Nyast tillagd</option>
+            </select>
+          </div>
+        </div>
+        <div id="movies-loading" class="loading" aria-busy="true" hidden>
+          <div class="spinner"></div>
+          <span>Laddar…</span>
+        </div>
+        <p id="movies-empty" class="empty-state" hidden>Inget innehåll hittades.</p>
+        <div id="movies-grid" class="content-grid" role="list"></div>
+      </section>
+
+      <!-- SERIES VIEW -->
+      <section id="view-series" class="view" aria-label="Serier" hidden>
+        <div class="view-toolbar">
+          <div class="toolbar-left">
+            <select id="series-category" class="select" aria-label="Välj seriekategori">
+              <option value="">Alla kategorier</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <div class="search-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="series-search" type="search" class="search-input" placeholder="Sök serier…" aria-label="Sök serier" />
+            </div>
+            <select id="series-sort" class="select select-sm" aria-label="Sortera serier">
+              <option value="name">Namn A–Ö</option>
+              <option value="rating">Betyg (högst)</option>
+              <option value="added">Nyast tillagd</option>
+            </select>
+          </div>
+        </div>
+        <div id="series-loading" class="loading" aria-busy="true" hidden>
+          <div class="spinner"></div>
+          <span>Laddar…</span>
+        </div>
+        <p id="series-empty" class="empty-state" hidden>Inget innehåll hittades.</p>
+        <div id="series-grid" class="content-grid" role="list"></div>
+      </section>
+
+      <!-- LISTS VIEW -->
+      <section id="view-lists" class="view" aria-label="Mina Listor" hidden>
+        <div class="lists-toolbar">
+          <div class="lists-create">
+            <input id="new-list-name" type="text" class="input" placeholder="Namn på ny lista…" aria-label="Namn på ny lista" maxlength="60" />
+            <button id="create-list-btn" class="btn btn-primary btn-sm" type="button">Skapa lista</button>
+          </div>
+          <div class="search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="lists-search" type="search" class="search-input" placeholder="Sök i listan…" aria-label="Sök i aktiv lista" />
+          </div>
+        </div>
+        <div class="lists-layout">
+          <div class="lists-sidebar">
+            <div id="lists-tabs" class="lists-tabs" role="tablist" aria-label="Mina listor"></div>
+            <button id="delete-list-btn" class="btn btn-danger btn-sm btn-full" type="button" hidden>Ta bort lista</button>
+          </div>
+          <div class="lists-content">
+            <p id="lists-empty" class="empty-state">Skapa en lista för att komma igång.</p>
+            <div id="lists-grid" class="content-grid" role="list"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ========== DETAIL MODAL ========== -->
+  <dialog id="detail-modal" class="detail-modal" aria-label="Detaljinformation">
+    <div class="modal-inner">
+      <button class="modal-close" type="button" aria-label="Stäng">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div id="modal-loading" class="loading" aria-busy="true">
+        <div class="spinner spinner-lg"></div>
+        <span>Hämtar information…</span>
+      </div>
+      <div id="modal-content" class="modal-content" hidden></div>
+    </div>
+  </dialog>
+
+  <!-- ========== ADD-TO-LIST MODAL ========== -->
+  <dialog id="lists-modal" class="lists-modal" aria-label="Hantera listor">
+    <div class="modal-inner modal-inner-sm">
+      <button class="modal-close" type="button" aria-label="Stäng">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h2 class="modal-title">Lägg till i lista</h2>
+      <div id="lists-modal-body" class="lists-modal-body"></div>
+    </div>
+  </dialog>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

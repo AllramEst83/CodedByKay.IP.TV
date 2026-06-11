@@ -1,0 +1,5 @@
+- Implement pagination functionality (options for 15, 25, 50, and 100 items, with 25 as the default) to improve resposniveness. The pagination should support filterin, sorting and searching.
+- Implement domain whitelisting for the Netlify function and use a shared folder in Netlify.
+- Move XStream credentials to a settings modal or page within the app and store them in localStorage.
+- Replace the XStream server login credentials with a PIN code entry.
+- Store the allowed PINs as environment variables and ensure the system supports multiple values via a comma-separated list.
