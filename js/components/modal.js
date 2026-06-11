@@ -4,6 +4,7 @@
  */
 
 import { getVodInfo, getSeriesInfo } from '../api/xtream.js';
+import { proxyImageUrl } from '../utils/imageProxy.js';
 
 const PLACEHOLDER_SVG = `
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -57,8 +58,8 @@ export async function openVodModal(item, getItemListsFn) {
 
     renderModalContent(contentEl, {
       title: info.name ?? movieData.name ?? item.name ?? '(Ingen titel)',
-      poster: info.movie_image ?? item.stream_icon ?? null,
-      backdrop: info.backdrop_path?.[0] ?? null,
+      poster: proxyImageUrl(info.movie_image ?? item.stream_icon ?? null),
+      backdrop: proxyImageUrl(info.backdrop_path?.[0] ?? null),
       rating: info.rating ?? movieData.rating ?? item.rating ?? null,
       year: info.releasedate?.slice(0, 4) ?? movieData.releaseDate?.slice(0, 4) ?? null,
       genre: info.genre ?? null,
@@ -98,8 +99,8 @@ export async function openSeriesModal(item, getItemListsFn) {
 
     renderModalContent(contentEl, {
       title: info.name ?? item.name ?? '(Ingen titel)',
-      poster: info.cover ?? item.cover ?? null,
-      backdrop: info.backdrop_path ?? null,
+      poster: proxyImageUrl(info.cover ?? item.cover ?? null),
+      backdrop: proxyImageUrl(info.backdrop_path ?? null),
       rating: info.rating ?? item.rating ?? null,
       year: info.releaseDate?.slice(0, 4) ?? null,
       genre: info.genre ?? null,
@@ -129,7 +130,7 @@ function renderModalContent(container, { title, poster, backdrop, rating, year, 
     <div class="modal-detail">
       <div class="modal-poster-col">
         ${poster
-          ? `<img class="modal-poster" src="${escapeAttr(poster)}" alt="${escapeAttr(title)}" loading="lazy" />`
+          ? `<img class="modal-poster" src="${escapeAttr(poster)}" alt="${escapeAttr(title)}" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.hidden=false;" /><div class="modal-poster-placeholder" hidden aria-hidden="true">${PLACEHOLDER_SVG}</div>`
           : `<div class="modal-poster-placeholder" aria-hidden="true">${PLACEHOLDER_SVG}</div>`
         }
       </div>
