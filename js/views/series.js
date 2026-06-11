@@ -1,12 +1,13 @@
 /**
- * Series view — with pagination, search, sort.
+ * Series view — with pagination, search, sort, and genre filter.
  */
 
-import { getSeriesCategories, getSeries } from '../api/xtream.js';
+import { getSeriesCategories, getSeries, prefetchGenres, getGenreForItem } from '../api/xtream.js';
 import { renderGrid, sortItems } from '../components/grid.js';
 import { initSearch, filterItems } from '../components/search.js';
 import { paginate, renderPagination, DEFAULT_PAGE_SIZE } from '../components/pagination.js';
 import { openSeriesModal } from '../components/modal.js';
+import { createGenreFilter, parseGenreString } from '../components/genreFilter.js';
 
 let _pin = null;
 let _allItems   = [];
@@ -16,12 +17,28 @@ let _page       = 1;
 let _pageSize   = DEFAULT_PAGE_SIZE;
 let _cleanupSearch = null;
 
+/** @type {Set<string>} */
+let _selectedGenres = new Set();
+/** @type {ReturnType<createGenreFilter>|null} */
+let _genreFilter = null;
+/** @type {AbortController|null} */
+let _prefetchAbort = null;
+
 export async function initSeriesView(pin, store) {
   _pin = pin;
 
   const categorySelect = document.getElementById('series-category');
   const sortSelect     = document.getElementById('series-sort');
   const searchInput    = document.getElementById('series-search');
+
+  _genreFilter = createGenreFilter(
+    document.getElementById('series-genre-filter'),
+    (genres) => {
+      _selectedGenres = genres;
+      _page = 1;
+      renderCurrentItems(store);
+    }
+  );
 
   try {
     const cats = await getSeriesCategories(pin);
@@ -77,12 +94,20 @@ export async function reloadSeriesView(store) {
 }
 
 async function loadCategory(categoryId, store) {
+  // Cancel any in-flight genre prefetch for the previous category
+  if (_prefetchAbort) {
+    _prefetchAbort.abort();
+    _prefetchAbort = null;
+  }
+
   setLoading('series', true);
   clearError('series');
 
   try {
     _allItems = await getSeries(_pin, categoryId);
     _page = 1;
+    _selectedGenres = new Set();
+    _genreFilter?.reset();
     renderCurrentItems(store);
   } catch (err) {
     showError('series', err.message);
@@ -90,6 +115,49 @@ async function loadCategory(categoryId, store) {
   } finally {
     setLoading('series', false);
   }
+
+  // Kick off background genre prefetch (does not block the UI)
+  if (_allItems.length > 0) {
+    _startGenrePrefetch(store);
+  }
+}
+
+function _startGenrePrefetch(store) {
+  _prefetchAbort = new AbortController();
+  const { signal } = _prefetchAbort;
+  const snapshot = _allItems;
+
+  prefetchGenres(_pin, snapshot, 'series', {
+    signal,
+    maxItems: 300,
+    onProgress: (loaded, total) => {
+      if (signal.aborted) return;
+      _syncGenresFromCache(snapshot);
+      _genreFilter?.setLoading(loaded < total, loaded, total);
+    },
+  }).then(() => {
+    if (!signal.aborted) {
+      _syncGenresFromCache(snapshot);
+      _genreFilter?.setLoading(false, 0, 0);
+    }
+  }).catch(() => {
+    // Prefetch cancelled or failed — leave filter with whatever was found
+  });
+}
+
+/**
+ * Walk the current item list and push any newly-cached genres into the filter.
+ */
+function _syncGenresFromCache(items) {
+  const found = new Set();
+  for (const item of items) {
+    const id = item.series_id ?? item.id;
+    const genre = getGenreForItem(id);
+    if (genre) {
+      for (const g of parseGenreString(genre)) found.add(g);
+    }
+  }
+  _genreFilter?.addGenres(found);
 }
 
 function renderCurrentItems(store) {
@@ -99,6 +167,16 @@ function renderCurrentItems(store) {
 
   let filtered = filterItems(_allItems, _query);
   filtered = sortItems(filtered, _sortBy);
+
+  // Apply genre filter
+  if (_selectedGenres.size > 0) {
+    filtered = filtered.filter(item => {
+      const id = item.series_id ?? item.id;
+      const genre = getGenreForItem(id);
+      if (!genre) return false;
+      return parseGenreString(genre).some(g => _selectedGenres.has(g));
+    });
+  }
 
   const result = paginate(filtered, _page, _pageSize);
 
