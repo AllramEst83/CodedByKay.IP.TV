@@ -1,21 +1,23 @@
 /**
  * IPTV Hub — App entry point
- * Bootstraps auth, view routing and the shared store.
+ * PIN-based auth, view routing, shared store.
+ *
+ * Xtream server credentials live exclusively in Netlify env vars.
+ * The client only ever stores and sends the PIN.
  */
 
 import { authenticate } from './api/xtream.js';
 import {
-  saveCredentials,
-  loadCredentials,
-  clearCredentials,
+  savePin,
+  loadPin,
+  clearPin,
   loadLists,
-  saveLists,
-  createList as storageCreateList,
-  deleteList as storageDeleteList,
-  addToList as storageAddToList,
+  createList     as storageCreateList,
+  deleteList     as storageDeleteList,
+  addToList      as storageAddToList,
   removeFromList as storageRemoveFromList,
-  isInList as storageIsInList,
-  getItemLists as storageGetItemLists,
+  isInList       as storageIsInList,
+  getItemLists   as storageGetItemLists,
 } from './storage/local.js';
 import { initModal, openListsModal } from './components/modal.js';
 import { initMoviesView } from './views/movies.js';
@@ -27,9 +29,10 @@ import { initListsView, refreshListsView } from './views/lists.js';
 let listsMap = loadLists();
 
 const store = {
-  getLists: () => listsMap,
-  getItemLists: (item) => storageGetItemLists(listsMap, item),
-  isInList: (name, item) => storageIsInList(listsMap, name, item),
+  getLists:     ()            => listsMap,
+  getItemLists: (item)        => storageGetItemLists(listsMap, item),
+  isInList:     (name, item)  => storageIsInList(listsMap, name, item),
+
   createList(name) {
     const ok = storageCreateList(listsMap, name);
     if (ok) refreshListsViewIfActive();
@@ -53,45 +56,79 @@ const store = {
   },
 };
 
-// Expose store globally so modal.js can call it without circular imports
 window.__iptv_store__ = store;
 
-// ─── Login / Logout ───────────────────────────────────────────────────────────
+// ─── PIN Keypad ───────────────────────────────────────────────────────────────
 
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
+const MAX_PIN_LENGTH = 6;
+let pinValue = '';
+
+function updatePinDisplay() {
+  document.querySelectorAll('.pin-dot').forEach((dot, i) => {
+    dot.classList.toggle('filled', i < pinValue.length);
+  });
+  document.getElementById('pin-submit').disabled = pinValue.length < 1;
+}
+
+document.querySelectorAll('.key-btn[data-digit]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (pinValue.length >= MAX_PIN_LENGTH) return;
+    pinValue += btn.dataset.digit;
+    updatePinDisplay();
+  });
+});
+
+document.getElementById('pin-backspace').addEventListener('click', () => {
+  pinValue = pinValue.slice(0, -1);
+  updatePinDisplay();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('login-screen').hidden) return;
+  if (e.key >= '0' && e.key <= '9' && pinValue.length < MAX_PIN_LENGTH) {
+    pinValue += e.key;
+    updatePinDisplay();
+  } else if (e.key === 'Backspace') {
+    pinValue = pinValue.slice(0, -1);
+    updatePinDisplay();
+  } else if (e.key === 'Enter') {
+    document.getElementById('pin-submit').click();
+  }
+});
+
+// ─── PIN Submit ───────────────────────────────────────────────────────────────
+
+document.getElementById('pin-submit').addEventListener('click', async () => {
   const errorEl = document.getElementById('login-error');
-  const btn = document.getElementById('login-btn');
-  const label = btn.querySelector('.btn-label');
+  const btn     = document.getElementById('pin-submit');
+  const label   = btn.querySelector('.btn-label');
   const spinner = btn.querySelector('.btn-spinner');
 
-  const creds = {
-    serverUrl: document.getElementById('server-url').value.trim(),
-    username: document.getElementById('username').value.trim(),
-    password: document.getElementById('password').value.trim(),
-  };
-
   errorEl.hidden = true;
-  btn.disabled = true;
-  label.textContent = 'Ansluter…';
+  btn.disabled   = true;
+  label.textContent = 'Verifierar…';
   spinner.hidden = false;
 
   try {
-    await authenticate(creds);
-    saveCredentials(creds);
-    startApp(creds);
+    await authenticate(pinValue);
+    savePin(pinValue);
+    startApp(pinValue);
   } catch (err) {
     errorEl.textContent = err.message;
     errorEl.hidden = false;
+    pinValue = '';
+    updatePinDisplay();
   } finally {
-    btn.disabled = false;
-    label.textContent = 'Anslut';
+    btn.disabled = pinValue.length < 1;
+    label.textContent = 'Logga in';
     spinner.hidden = true;
   }
 });
 
+// ─── Logout ───────────────────────────────────────────────────────────────────
+
 document.getElementById('logout-btn').addEventListener('click', () => {
-  clearCredentials();
+  clearPin();
   showLoginScreen();
 });
 
@@ -100,7 +137,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 const views = {
   movies: document.getElementById('view-movies'),
   series: document.getElementById('view-series'),
-  lists: document.getElementById('view-lists'),
+  lists:  document.getElementById('view-lists'),
 };
 
 let _activeView = 'movies';
@@ -114,47 +151,40 @@ document.querySelectorAll('.nav-btn').forEach((btn) => {
     document.querySelectorAll('.nav-btn').forEach((b) => b.classList.remove('is-active'));
     btn.classList.add('is-active');
 
-    Object.entries(views).forEach(([key, el]) => {
-      el.hidden = key !== target;
-    });
-
+    Object.entries(views).forEach(([key, el]) => { el.hidden = key !== target; });
     _activeView = target;
   });
 });
 
 function refreshListsViewIfActive() {
-  if (_activeView === 'lists') {
-    refreshListsView(store);
-  }
+  if (_activeView === 'lists') refreshListsView(store);
 }
 
 // ─── App start ────────────────────────────────────────────────────────────────
 
-function startApp(creds) {
+function startApp(pin) {
   document.getElementById('login-screen').hidden = true;
   document.getElementById('app').hidden = false;
 
-  // Reset to movies view
   _activeView = 'movies';
   Object.entries(views).forEach(([key, el]) => { el.hidden = key !== 'movies'; });
   document.querySelectorAll('.nav-btn').forEach((b) => {
     b.classList.toggle('is-active', b.dataset.view === 'movies');
   });
 
-  initModal(creds, (item, type) => store.openListsModal(item));
+  initModal(pin, (item) => store.openListsModal(item));
 
   if (!_viewsInitialized.has('movies')) {
-    initMoviesView(creds, store);
+    initMoviesView(pin, store);
     _viewsInitialized.add('movies');
   }
 
-  // Lazy-init series and lists views on first nav
   document.querySelectorAll('.nav-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const v = btn.dataset.view;
       if (!_viewsInitialized.has(v)) {
-        if (v === 'series') initSeriesView(creds, store);
-        if (v === 'lists') initListsView(store);
+        if (v === 'series') initSeriesView(pin, store);
+        if (v === 'lists')  initListsView(store);
         _viewsInitialized.add(v);
       }
     });
@@ -164,20 +194,24 @@ function startApp(creds) {
 function showLoginScreen() {
   document.getElementById('app').hidden = true;
   document.getElementById('login-screen').hidden = false;
+  pinValue = '';
+  updatePinDisplay();
   _viewsInitialized.clear();
 }
 
 // ─── Auto-login ───────────────────────────────────────────────────────────────
 
-const savedCreds = loadCredentials();
-if (savedCreds) {
-  // Pre-fill form in case auth fails
-  document.getElementById('server-url').value = savedCreds.serverUrl ?? '';
-  document.getElementById('username').value = savedCreds.username ?? '';
-  document.getElementById('password').value = savedCreds.password ?? '';
+const savedPin = loadPin();
+if (savedPin) {
+  pinValue = savedPin;
+  updatePinDisplay();
 
-  // Silently verify credentials on load
-  authenticate(savedCreds)
-    .then(() => startApp(savedCreds))
-    .catch(() => showLoginScreen());
+  authenticate(savedPin)
+    .then(() => startApp(savedPin))
+    .catch(() => {
+      clearPin();
+      pinValue = '';
+      updatePinDisplay();
+      showLoginScreen();
+    });
 }

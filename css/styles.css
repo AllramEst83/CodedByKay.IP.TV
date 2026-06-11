@@ -105,19 +105,22 @@ dialog::backdrop {
 
 .login-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 360px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  padding: 40px 36px;
+  padding: 36px 32px;
   box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 
 .login-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 28px;
 }
 
 .login-logo svg {
@@ -134,13 +137,91 @@ dialog::backdrop {
 }
 
 .login-card h1 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-muted);
-  margin-bottom: 24px;
+  margin: 0;
 }
 
-/* --- Fields --- */
+/* ── PIN dots ──────────────────────────────────── */
+
+.pin-display {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+}
+
+.pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--border);
+  border: 2px solid var(--border);
+  transition: background var(--transition), border-color var(--transition), transform 0.1s;
+}
+
+.pin-dot.filled {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.15);
+}
+
+/* ── PIN Keypad ────────────────────────────────── */
+
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.key-btn {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), transform 0.08s;
+  user-select: none;
+}
+
+.key-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+}
+
+.key-btn:active {
+  transform: scale(0.94);
+}
+
+.key-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.key-empty {
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+  pointer-events: none;
+}
+
+.key-backspace {
+  color: var(--text-muted);
+  font-size: 0;
+}
+
+/* ── Fields (used in settings modal) ──────────── */
+
 .field {
   display: flex;
   flex-direction: column;
@@ -163,6 +244,7 @@ dialog::backdrop {
   color: var(--text);
   outline: none;
   transition: border-color var(--transition), box-shadow var(--transition);
+  width: 100%;
 }
 
 .field input:focus,
@@ -176,7 +258,8 @@ dialog::backdrop {
   color: var(--text-dim);
 }
 
-/* --- Error message --- */
+/* ── Error / Success messages ──────────────────── */
+
 .error-msg {
   color: var(--danger);
   font-size: 0.875rem;
@@ -185,6 +268,18 @@ dialog::backdrop {
   border: 1px solid rgba(224, 82, 96, 0.25);
   border-radius: var(--radius-sm);
   margin-bottom: 12px;
+  width: 100%;
+}
+
+.success-msg {
+  color: var(--success);
+  font-size: 0.875rem;
+  padding: 10px 14px;
+  background: rgba(61, 214, 140, 0.08);
+  border: 1px solid rgba(61, 214, 140, 0.25);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  width: 100%;
 }
 
 /* =========================================
@@ -274,7 +369,8 @@ dialog::backdrop {
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* --- Header --- */
@@ -298,6 +394,15 @@ dialog::backdrop {
   gap: 10px;
   flex-shrink: 0;
 }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+
 
 .header-brand svg {
   width: 32px;
@@ -352,7 +457,9 @@ dialog::backdrop {
 /* --- Main --- */
 .app-main {
   flex: 1;
-  padding: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   max-width: 1600px;
   width: 100%;
   margin: 0 auto;
@@ -362,23 +469,68 @@ dialog::backdrop {
    VIEWS
    ========================================= */
 
+/* Views use the [hidden] attribute to toggle; display: flex is overridden
+   by the [hidden] { display: none !important } utility rule below. */
 .view {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  flex: 1;
+  overflow: hidden;
 }
 
-/* --- Toolbar --- */
+/* --- Toolbar (pinned top) --- */
 .view-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+  flex-shrink: 0;
+  padding: 12px 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+/* --- Scrollable body --- */
+.view-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.view-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.view-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.view-body::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* --- Pagination footer (pinned bottom) --- */
+.view-footer {
+  flex-shrink: 0;
+  padding: 0 24px 12px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+/* Only show the footer border when pagination is rendered */
+.view-footer:empty,
+.view-footer > div:empty {
+  display: none;
 }
 
 .toolbar-left,
-.toolbar-right {
+.toolbar-right,
+.lists-create {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -601,28 +753,27 @@ dialog::backdrop {
    LISTS VIEW
    ========================================= */
 
-.lists-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
+/* lists-toolbar is now a .view-toolbar — only extra list-specific bits needed */
 .lists-create {
-  display: flex;
-  gap: 8px;
   flex: 1;
-  min-width: 260px;
+  min-width: 200px;
 }
 
 .lists-create .input {
   flex: 1;
+  min-width: 0;
+}
+
+/* The view-body for lists fills height and lets the layout scroll */
+.view-body--lists {
+  padding: 0;
 }
 
 .lists-layout {
   display: flex;
-  gap: 20px;
-  align-items: flex-start;
+  gap: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .lists-sidebar {
@@ -631,6 +782,11 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 20px 16px 20px 24px;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
 .lists-tabs {
@@ -670,6 +826,10 @@ dialog::backdrop {
 .lists-content {
   flex: 1;
   min-width: 0;
+  overflow-y: auto;
+  padding: 20px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
 /* =========================================
@@ -975,7 +1135,8 @@ dialog::backdrop {
   }
 
   .toolbar-left,
-  .toolbar-right {
+  .toolbar-right,
+  .lists-create {
     justify-content: stretch;
   }
 
@@ -987,10 +1148,15 @@ dialog::backdrop {
 
   .lists-layout {
     flex-direction: column;
+    overflow-y: auto;
   }
 
   .lists-sidebar {
     width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    overflow-y: visible;
   }
 
   .lists-tabs {
@@ -1000,6 +1166,10 @@ dialog::backdrop {
 
   .lists-tab {
     width: auto;
+  }
+
+  .lists-content {
+    padding: 14px 16px;
   }
 
   .modal-inner {
@@ -1017,6 +1187,94 @@ dialog::backdrop {
   .modal-info-title {
     font-size: 1.3rem;
   }
+}
+
+/* =========================================
+   PAGINATION
+   ========================================= */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 0 0;
+}
+
+.pagination-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.page-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.page-btn:not(:disabled):hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.page-btn.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  cursor: default;
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.page-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 34px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  user-select: none;
+}
+
+.pagination-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-size-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 /* =========================================

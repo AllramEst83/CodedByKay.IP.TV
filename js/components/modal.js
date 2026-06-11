@@ -13,12 +13,12 @@ const PLACEHOLDER_SVG = `
 
 const STAR_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
 
-let _creds = null;
+let _pin = null;
 let _onListAction = null;
 
-/** @param {object} creds */
-export function initModal(creds, onListAction) {
-  _creds = creds;
+/** @param {string} pin */
+export function initModal(pin, onListAction) {
+  _pin = pin;
   _onListAction = onListAction;
 
   const dialog = document.getElementById('detail-modal');
@@ -51,7 +51,7 @@ export async function openVodModal(item, getItemListsFn) {
 
   try {
     const id = item.stream_id ?? item.vod_id ?? item.id;
-    const data = await getVodInfo(_creds, id);
+    const data = await getVodInfo(_pin, id);
     const info = data?.info ?? {};
     const movieData = data?.movie_data ?? item;
 
@@ -93,7 +93,7 @@ export async function openSeriesModal(item, getItemListsFn) {
 
   try {
     const id = item.series_id ?? item.id;
-    const data = await getSeriesInfo(_creds, id);
+    const data = await getSeriesInfo(_pin, id);
     const info = data?.info ?? {};
 
     renderModalContent(contentEl, {

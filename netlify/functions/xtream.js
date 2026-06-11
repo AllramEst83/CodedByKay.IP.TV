@@ -2,11 +2,23 @@
  * Netlify Function — Xtream Codes API proxy (BFF)
  *
  * Accepts POST requests from the client with:
- *   { serverUrl, username, password, action, ...extraParams }
+ *   { pin, action, ...extraParams }
  *
- * Builds the Xtream player_api.php URL and proxies the request
- * server-side to avoid CORS issues.
+ * Xtream credentials (XTREAM_SERVER_URL, XTREAM_USERNAME, XTREAM_PASSWORD)
+ * are read exclusively from server-side environment variables — they are
+ * never exposed to or sent from the client.
+ *
+ * Security layers:
+ *   1. Origin/domain whitelisting (ALLOWED_ORIGINS env var)
+ *   2. PIN validation              (ALLOWED_PINS    env var)
  */
+
+import {
+  validatePin,
+  validateOrigin,
+  originForbiddenResponse,
+  pinUnauthorizedResponse,
+} from './_shared/validate.js';
 
 const ALLOWED_ACTIONS = new Set([
   'authenticate',
@@ -21,35 +33,50 @@ const ALLOWED_ACTIONS = new Set([
 const TIMEOUT_MS = 15_000;
 
 export default async function handler(req, context) {
+  // ── 1. Method guard ────────────────────────────────────────────────────────
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return errorResponse(405, 'Method not allowed');
   }
 
+  // ── 2. Origin / domain whitelist ──────────────────────────────────────────
+  if (!validateOrigin(req)) {
+    return originForbiddenResponse();
+  }
+
+  // ── 3. Parse body ─────────────────────────────────────────────────────────
   let body;
   try {
     body = await req.json();
   } catch {
-    return errorResponse(400, 'Invalid JSON body');
+    return errorResponse(400, 'Ogiltig JSON-kropp.');
   }
 
-  const { serverUrl, username, password, action, ...extras } = body ?? {};
+  const { pin, action, ...extras } = body ?? {};
+
+  // ── 4. PIN validation ─────────────────────────────────────────────────────
+  if (!validatePin(pin)) {
+    return pinUnauthorizedResponse();
+  }
+
+  // ── 5. Load credentials from environment (never from client) ─────────────
+  const serverUrl = process.env.XTREAM_SERVER_URL ?? '';
+  const username  = process.env.XTREAM_USERNAME   ?? '';
+  const password  = process.env.XTREAM_PASSWORD   ?? '';
 
   if (!serverUrl || !username || !password) {
-    return errorResponse(400, 'serverUrl, username och password krävs.');
+    return errorResponse(500, 'Serverinställningar saknas. Kontakta administratören.');
   }
 
   if (action && !ALLOWED_ACTIONS.has(action)) {
     return errorResponse(400, `Okänd action: ${action}`);
   }
 
+  // ── 6. Build Xtream URL ───────────────────────────────────────────────────
   let baseUrl;
   try {
     baseUrl = new URL('/player_api.php', normalizeServerUrl(serverUrl));
   } catch {
-    return errorResponse(400, 'Ogiltig server URL.');
+    return errorResponse(500, 'Ogiltig server URL i miljökonfigurationen.');
   }
 
   baseUrl.searchParams.set('username', username);
@@ -59,7 +86,6 @@ export default async function handler(req, context) {
     baseUrl.searchParams.set('action', action);
   }
 
-  // Append allowed extra parameters
   const ALLOWED_EXTRAS = ['category_id', 'vod_id', 'series_id', 'stream_id'];
   for (const key of ALLOWED_EXTRAS) {
     if (extras[key] != null) {
@@ -67,8 +93,9 @@ export default async function handler(req, context) {
     }
   }
 
+  // ── 7. Proxy request ──────────────────────────────────────────────────────
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timeoutId  = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
     const upstream = await fetch(baseUrl.toString(), {
@@ -80,16 +107,15 @@ export default async function handler(req, context) {
 
     if (!upstream.ok) {
       if (upstream.status === 401 || upstream.status === 403) {
-        return errorResponse(401, 'Ogiltiga inloggningsuppgifter.');
+        return errorResponse(401, 'Ogiltiga inloggningsuppgifter på servern.');
       }
       return errorResponse(502, `Leverantören svarade med status ${upstream.status}.`);
     }
 
     const data = await upstream.json();
 
-    // Xtream returns user_info.auth === 0 when credentials are wrong
     if (data?.user_info?.auth === 0) {
-      return errorResponse(401, 'Ogiltiga inloggningsuppgifter.');
+      return errorResponse(401, 'Ogiltiga inloggningsuppgifter på servern.');
     }
 
     return new Response(JSON.stringify(data), {
@@ -107,12 +133,13 @@ export default async function handler(req, context) {
   }
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function normalizeServerUrl(raw) {
   const trimmed = raw.trim().replace(/\/+$/, '');
-  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
-    return `http://${trimmed}`;
-  }
-  return trimmed;
+  return trimmed.startsWith('http://') || trimmed.startsWith('https://')
+    ? trimmed
+    : `http://${trimmed}`;
 }
 
 function errorResponse(status, message) {
