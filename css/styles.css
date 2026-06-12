@@ -528,6 +528,83 @@ dialog::backdrop {
   display: none;
 }
 
+/* --- Genre filter bar (below toolbar) --- */
+.genre-filter-bar {
+  flex-shrink: 0;
+  padding: 8px 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.genre-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.genre-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  min-width: max-content;
+}
+
+.genre-chip {
+  padding: 5px 13px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.genre-chip:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--bg-card-hover);
+}
+
+.genre-chip.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.genre-clear-btn {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  margin-left: 4px;
+}
+
+.genre-clear-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(224, 82, 96, 0.08);
+}
+
+.genre-loading-text {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  padding: 0 4px;
+}
+
 .toolbar-left,
 .toolbar-right,
 .lists-create {
@@ -1275,6 +1352,50 @@ dialog::backdrop {
   font-size: 0.82rem;
   color: var(--text-muted);
   white-space: nowrap;
+}
+
+/* =========================================
+   TOAST NOTIFICATION
+   ========================================= */
+
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast.toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: var(--success);
+}
+
+/* spinning state for the clear-cache button */
+.btn-refreshing svg {
+  animation: spin 0.7s linear infinite;
 }
 
 /* =========================================

@@ -3,6 +3,8 @@
  * Renders an array of VOD/series items as article cards into a container.
  */
 
+import { proxyImageUrl } from '../utils/imageProxy.js';
+
 const PLACEHOLDER_SVG = `
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
   <rect x="2" y="4" width="20" height="16" rx="2"/>
@@ -33,12 +35,13 @@ export function renderGrid(container, items, { onSelect, getListCount } = {}) {
       item.series_name ??
       '(Ingen titel)';
 
-    const posterSrc =
+    const posterSrc = proxyImageUrl(
       item.stream_icon ??
       item.cover ??
       item.backdrop_path ??
       item.poster_path ??
-      null;
+      null
+    );
 
     const rating = parseFloat(item.rating ?? item.rating_5based ?? 0);
     const year = item.releaseDate?.slice(0, 4) ?? item.year ?? null;
@@ -49,7 +52,7 @@ export function renderGrid(container, items, { onSelect, getListCount } = {}) {
       ${listCount > 0 ? `<span class="card-list-badge" aria-label="Finns i ${listCount} lista(r)">${listCount}</span>` : ''}
       ${
         posterSrc
-          ? `<img class="card-poster" src="${escapeAttr(posterSrc)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" />`
+          ? `<img class="card-poster" src="${escapeAttr(posterSrc)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.hidden=false;" /><div class="card-poster-placeholder" hidden aria-hidden="true">${PLACEHOLDER_SVG}</div>`
           : `<div class="card-poster-placeholder" aria-hidden="true">${PLACEHOLDER_SVG}</div>`
       }
       <div class="card-body">

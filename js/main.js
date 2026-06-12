@@ -6,7 +6,7 @@
  * The client only ever stores and sends the PIN.
  */
 
-import { authenticate } from './api/xtream.js';
+import { authenticate, clearApiCache } from './api/xtream.js';
 import {
   savePin,
   loadPin,
@@ -20,8 +20,8 @@ import {
   getItemLists   as storageGetItemLists,
 } from './storage/local.js';
 import { initModal, openListsModal } from './components/modal.js';
-import { initMoviesView } from './views/movies.js';
-import { initSeriesView } from './views/series.js';
+import { initMoviesView, reloadMoviesView } from './views/movies.js';
+import { initSeriesView, reloadSeriesView } from './views/series.js';
 import { initListsView, refreshListsView } from './views/lists.js';
 
 // ─── Shared store ─────────────────────────────────────────────────────────────
@@ -125,9 +125,49 @@ document.getElementById('pin-submit').addEventListener('click', async () => {
   }
 });
 
+// ─── Toast ────────────────────────────────────────────────────────────────────
+
+let _toastTimer = null;
+
+function showToast(message, durationMs = 2500) {
+  const el = document.getElementById('app-toast');
+  el.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    ${message}
+  `;
+  el.classList.add('toast--visible');
+
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('toast--visible'), durationMs);
+}
+
+// ─── Cache purge ──────────────────────────────────────────────────────────────
+
+document.getElementById('clear-cache-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('clear-cache-btn');
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.classList.add('btn-refreshing');
+
+  clearApiCache();
+
+  try {
+    if (_viewsInitialized.has('movies')) await reloadMoviesView(store);
+    if (_viewsInitialized.has('series')) await reloadSeriesView(store);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('btn-refreshing');
+    showToast('Cache rensad — data uppdaterad');
+  }
+});
+
 // ─── Logout ───────────────────────────────────────────────────────────────────
 
 document.getElementById('logout-btn').addEventListener('click', () => {
+  clearApiCache();
   clearPin();
   showLoginScreen();
 });
