@@ -48,12 +48,14 @@ export function renderGrid(container, items, { onSelect, onAddToList, getListCou
       null
     );
 
-    const rating = parseFloat(item.rating ?? item.rating_5based ?? 0);
+    const rawRating = item.rating != null && item.rating !== ''
+      ? parseFloat(item.rating)
+      : (item.rating_5based != null ? parseFloat(item.rating_5based) * 2 : NaN);
+    const rating = isNaN(rawRating) ? 0 : rawRating;
     const year = item.releaseDate?.slice(0, 4) ?? item.year ?? null;
     const listCount = getListCount?.(item) ?? 0;
 
     article.innerHTML = `
-      ${rating > 0 ? `<span class="card-rating-badge" aria-label="Rating ${rating.toFixed(1)}">${rating.toFixed(1)}</span>` : ''}
       ${listCount > 0 ? `<span class="card-list-badge" aria-label="In ${listCount} list(s)">${listCount}</span>` : ''}
       ${
         posterSrc
@@ -61,7 +63,10 @@ export function renderGrid(container, items, { onSelect, onAddToList, getListCou
           : `<div class="card-poster-placeholder" aria-hidden="true">${PLACEHOLDER_SVG}</div>`
       }
       <div class="card-body">
-        <h3 class="card-title" title="${escapeAttr(title)}">${escapeHtml(title)}</h3>
+        <div class="card-title-row">
+          <h3 class="card-title" title="${escapeAttr(title)}">${escapeHtml(title)}</h3>
+          ${rating > 0 ? `<span class="card-rating-pill" aria-label="Rating ${rating.toFixed(1)}">★ ${rating.toFixed(1)}</span>` : ''}
+        </div>
         ${year ? `<p class="card-year">${escapeHtml(year)}</p>` : ''}
         <div class="card-actions">
           <button class="card-action-btn add-list js-add-list${listCount > 0 ? ' is-in-list' : ''}" type="button" aria-label="${listCount > 0 ? 'Manage lists' : 'Add to list'}">
