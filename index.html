@@ -109,11 +109,6 @@
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </button>
 
-        <!-- Search icon -->
-        <button class="header-icon-btn" type="button" aria-label="Search" id="header-search-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </button>
-
         <!-- User avatar / dropdown trigger -->
         <button class="user-avatar-btn" id="user-menu-btn" type="button" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -238,8 +233,13 @@
         <div class="view-body view-body--lists">
           <div class="lists-layout">
             <div class="lists-sidebar">
-              <div id="lists-tabs" class="lists-tabs" role="tablist" aria-label="My lists"></div>
-              <button id="delete-list-btn" class="btn btn-danger btn-sm btn-full" type="button" hidden>Delete List</button>
+              <div class="lists-sidebar-row">
+                <div id="lists-tabs" class="lists-tabs" role="tablist" aria-label="My lists"></div>
+                <button id="delete-list-btn" class="btn btn-danger btn-sm lists-delete-btn" type="button" hidden aria-label="Delete list">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                  <span class="lists-delete-label">Delete</span>
+                </button>
+              </div>
             </div>
             <div class="lists-content">
               <p id="lists-empty" class="empty-state">Create a list to get started.</p>

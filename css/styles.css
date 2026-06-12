@@ -693,32 +693,6 @@ html:has(#login-screen:not([hidden])) {
   flex-shrink: 0;
 }
 
-.header-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: all var(--transition);
-  flex-shrink: 0;
-}
-
-.header-icon-btn:hover {
-  background: var(--bg-card-hover);
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.header-icon-btn svg {
-  width: 17px;
-  height: 17px;
-}
-
 /* User avatar button */
 .user-avatar-btn {
   width: 38px;
@@ -1451,12 +1425,18 @@ html:has(#login-screen:not([hidden])) {
   width: var(--sidebar-w);
   display: flex;
   flex-direction: column;
-  gap: 8px;
   padding: 20px 16px 20px 24px;
   border-right: 1px solid var(--border);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+}
+
+.lists-sidebar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
 }
 
 .lists-tabs {
@@ -1492,6 +1472,16 @@ html:has(#login-screen:not([hidden])) {
   border-color: var(--accent);
   color: var(--accent);
   font-weight: 600;
+}
+
+.lists-delete-btn {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.lists-delete-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .lists-content {
@@ -2333,17 +2323,49 @@ html:has(#login-screen:not([hidden])) {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
+    padding: 10px 16px;
     overflow-y: visible;
   }
 
-  .lists-tabs {
+  .lists-sidebar-row {
     flex-direction: row;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .lists-tabs {
+    flex: 1;
+    min-width: 0;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 0;
+  }
+
+  .lists-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .lists-tab {
     width: auto;
+    flex-shrink: 0;
+    max-width: min(220px, 70vw);
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .lists-delete-btn {
+    width: auto;
+    padding: 8px 12px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .lists-delete-label {
+    display: none;
   }
 
   .lists-content {
