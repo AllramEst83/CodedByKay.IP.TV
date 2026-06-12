@@ -90,7 +90,6 @@ async function callBff(payload) {
   let data;
   try {
     data = await res.json();
-    console.log(data);
   } catch {
     throw Object.assign(new Error(`Unexpected response (${res.status}).`), { status: res.status });
   }
