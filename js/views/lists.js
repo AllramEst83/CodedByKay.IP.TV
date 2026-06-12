@@ -37,6 +37,7 @@ export function initListsView(store) {
     if (!confirmed) return;
     store.deleteList(_activeList);
     _activeList = null;
+    ensureActiveList(store);
     renderSidebar(store);
     renderActiveList(store);
   });
@@ -52,13 +53,27 @@ export function initListsView(store) {
 }
 
 export function refreshListsView(store) {
+  ensureActiveList(store);
   renderSidebar(store);
   renderActiveList(store);
 }
 
 // ─── Sidebar (tab list) ───────────────────────────────────────────────────────
 
+/** Select the first list when none is active or the active list no longer exists. */
+function ensureActiveList(store) {
+  const lists = store.getLists();
+  if (lists.size === 0) {
+    _activeList = null;
+    return;
+  }
+  if (!_activeList || !lists.has(_activeList)) {
+    _activeList = lists.keys().next().value;
+  }
+}
+
 function renderSidebar(store) {
+  ensureActiveList(store);
   const tabsEl = document.getElementById('lists-tabs');
   const deleteBtn = document.getElementById('delete-list-btn');
   tabsEl.innerHTML = '';
@@ -95,9 +110,7 @@ function renderActiveList(store) {
   if (!_activeList || !store.getLists().has(_activeList)) {
     grid.innerHTML = '';
     emptyEl.hidden = false;
-    emptyEl.textContent = store.getLists().size === 0
-      ? 'Create a list to get started.'
-      : 'Select a list.';
+    emptyEl.textContent = 'Create a list to get started.';
     return;
   }
 

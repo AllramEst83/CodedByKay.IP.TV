@@ -52,7 +52,18 @@ const store = {
     refreshListsViewIfActive();
   },
   openListsModal(item) {
-    openListsModal(item, listsMap, (name, i) => store.toggleListItem(name, i));
+    openListsModal(item, listsMap, {
+      isInList: (name, i) => storageIsInList(listsMap, name, i),
+      onToggle: (name, i) => store.toggleListItem(name, i),
+      onCreateAndAdd: (name, i) => {
+        const trimmed = name.trim();
+        if (!trimmed) return 'empty';
+        if (!storageCreateList(listsMap, trimmed)) return 'duplicate';
+        storageAddToList(listsMap, trimmed, i);
+        refreshListsViewIfActive();
+        return 'ok';
+      },
+    });
   },
 };
 

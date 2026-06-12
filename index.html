@@ -137,22 +137,32 @@
     <main class="app-main">
       <!-- MOVIES VIEW -->
       <section id="view-movies" class="view is-active" aria-label="Movies">
-        <div class="view-toolbar">
-          <div class="toolbar-left">
-            <select id="movies-category" class="select" aria-label="Filter by category">
-              <option value="" disabled selected>Pick a category…</option>
-            </select>
-          </div>
-          <div class="toolbar-right">
-            <div class="search-wrap">
-              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input id="movies-search" type="search" class="search-input" placeholder="Search movies…" aria-label="Search movies" />
+        <div class="view-toolbar view-toolbar--collapsible">
+          <button type="button" class="toolbar-mobile-toggle" aria-expanded="false" aria-controls="movies-toolbar-panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span class="toolbar-mobile-label">Filters &amp; search</span>
+            <span class="toolbar-mobile-summary" hidden></span>
+            <svg class="toolbar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="movies-toolbar-panel" class="toolbar-panel">
+            <div class="toolbar-panel-inner">
+              <div class="toolbar-left">
+                <select id="movies-category" class="select" aria-label="Filter by category">
+                  <option value="" disabled selected>Pick a category…</option>
+                </select>
+              </div>
+              <div class="toolbar-right">
+                <div class="search-wrap">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input id="movies-search" type="search" class="search-input" placeholder="Search movies…" aria-label="Search movies" />
+                </div>
+                <select id="movies-sort" class="select select-sm" aria-label="Sort movies">
+                  <option value="name">Name A–Z</option>
+                  <option value="rating">Top Rated</option>
+                  <option value="added">Newest First</option>
+                </select>
+              </div>
             </div>
-            <select id="movies-sort" class="select select-sm" aria-label="Sort movies">
-              <option value="name">Name A–Z</option>
-              <option value="rating">Top Rated</option>
-              <option value="added">Newest First</option>
-            </select>
           </div>
         </div>
         <div id="movies-genre-filter" class="genre-filter-bar" hidden aria-label="Filter by genre"></div>
@@ -171,22 +181,32 @@
 
       <!-- SERIES VIEW -->
       <section id="view-series" class="view" aria-label="Series" hidden>
-        <div class="view-toolbar">
-          <div class="toolbar-left">
-            <select id="series-category" class="select" aria-label="Filter by category">
-              <option value="" disabled selected>Pick a category…</option>
-            </select>
-          </div>
-          <div class="toolbar-right">
-            <div class="search-wrap">
-              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input id="series-search" type="search" class="search-input" placeholder="Search series…" aria-label="Search series" />
+        <div class="view-toolbar view-toolbar--collapsible">
+          <button type="button" class="toolbar-mobile-toggle" aria-expanded="false" aria-controls="series-toolbar-panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span class="toolbar-mobile-label">Filters &amp; search</span>
+            <span class="toolbar-mobile-summary" hidden></span>
+            <svg class="toolbar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="series-toolbar-panel" class="toolbar-panel">
+            <div class="toolbar-panel-inner">
+              <div class="toolbar-left">
+                <select id="series-category" class="select" aria-label="Filter by category">
+                  <option value="" disabled selected>Pick a category…</option>
+                </select>
+              </div>
+              <div class="toolbar-right">
+                <div class="search-wrap">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input id="series-search" type="search" class="search-input" placeholder="Search series…" aria-label="Search series" />
+                </div>
+                <select id="series-sort" class="select select-sm" aria-label="Sort series">
+                  <option value="name">Name A–Z</option>
+                  <option value="rating">Top Rated</option>
+                  <option value="added">Newest First</option>
+                </select>
+              </div>
             </div>
-            <select id="series-sort" class="select select-sm" aria-label="Sort series">
-              <option value="name">Name A–Z</option>
-              <option value="rating">Top Rated</option>
-              <option value="added">Newest First</option>
-            </select>
           </div>
         </div>
         <div id="series-genre-filter" class="genre-filter-bar" hidden aria-label="Filter by genre"></div>

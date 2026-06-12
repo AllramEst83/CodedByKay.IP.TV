@@ -21,14 +21,36 @@ const PROXY = '/.netlify/functions/image';
 const IS_SECURE = typeof window !== 'undefined' && window.location.protocol === 'https:';
 
 /**
- * @param {string|null|undefined} url
+ * Normalizes Xtream image fields (string, array, or nested object) to a URL string.
+ * @param {unknown} value
+ * @returns {string|null}
+ */
+export function resolveImageUrl(value) {
+  if (value == null || value === '') return null;
+
+  if (Array.isArray(value)) {
+    return resolveImageUrl(value[0]);
+  }
+
+  if (typeof value === 'object') {
+    return resolveImageUrl(value.url ?? value.path ?? value.src ?? null);
+  }
+
+  const url = String(value).trim();
+  return url || null;
+}
+
+/**
+ * @param {unknown} url
  * @returns {string|null}
  */
 export function proxyImageUrl(url) {
-  if (!url) return null;
+  const resolved = resolveImageUrl(url);
+  if (!resolved) return null;
+
   // Only proxy HTTP images when running over HTTPS (production)
-  if (IS_SECURE && url.startsWith('http://')) {
-    return `${PROXY}?url=${encodeURIComponent(url)}`;
+  if (IS_SECURE && resolved.startsWith('http://')) {
+    return `${PROXY}?url=${encodeURIComponent(resolved)}`;
   }
-  return url;
+  return resolved;
 }

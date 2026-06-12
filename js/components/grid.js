@@ -6,6 +6,7 @@
  */
 
 import { proxyImageUrl } from '../utils/imageProxy.js';
+import { bindAllImageShimmers } from '../utils/imageLoad.js';
 
 const PLACEHOLDER_SVG = `
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -32,11 +33,12 @@ export function renderGrid(container, items, { onSelect, onAddToList, getListCou
     article.setAttribute('role', 'listitem');
     article.setAttribute('tabindex', '0');
 
-    const title =
+    const title = cleanTitle(
       item.name ??
       item.title ??
       item.series_name ??
-      '(No title)';
+      '(No title)'
+    );
 
     const posterSrc = proxyImageUrl(
       item.stream_icon ??
@@ -55,7 +57,7 @@ export function renderGrid(container, items, { onSelect, onAddToList, getListCou
       ${listCount > 0 ? `<span class="card-list-badge" aria-label="In ${listCount} list(s)">${listCount}</span>` : ''}
       ${
         posterSrc
-          ? `<img class="card-poster" src="${escapeAttr(posterSrc)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.hidden=false;" /><div class="card-poster-placeholder" hidden aria-hidden="true">${PLACEHOLDER_SVG}</div>`
+          ? `<div class="poster-wrap"><img class="card-poster" src="${escapeAttr(posterSrc)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.hidden=false;" /><div class="card-poster-placeholder" hidden aria-hidden="true">${PLACEHOLDER_SVG}</div></div>`
           : `<div class="card-poster-placeholder" aria-hidden="true">${PLACEHOLDER_SVG}</div>`
       }
       <div class="card-body">
@@ -97,6 +99,8 @@ export function renderGrid(container, items, { onSelect, onAddToList, getListCou
 
     container.appendChild(article);
   }
+
+  bindAllImageShimmers(container);
 }
 
 // ─── Sorting ──────────────────────────────────────────────────────────────────
@@ -136,4 +140,12 @@ function escapeHtml(str) {
 
 function escapeAttr(str) {
   return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/**
+ * Remove provider-appended noise tags like [PREMIERE], [HD], [4K], [EN] from titles.
+ * Leaves the year in parentheses intact since we may not have it separately.
+ */
+function cleanTitle(raw) {
+  return String(raw ?? '').replace(/\s*\[[^\]]*\]\s*$/, '').trim();
 }

@@ -10,6 +10,7 @@ import { initSearch, filterItems } from '../components/search.js';
 import { paginate, renderPagination, DEFAULT_PAGE_SIZE } from '../components/pagination.js';
 import { openVodModal } from '../components/modal.js';
 import { createGenreFilter, parseGenreString } from '../components/genreFilter.js';
+import { setupViewToolbar } from '../components/toolbarCollapse.js';
 
 let _pin = null;
 let _allItems   = [];
@@ -69,6 +70,7 @@ export async function initMoviesView(pin, store) {
     renderCurrentItems(store);
   });
 
+  setupViewToolbar('movies');
   showPickCategoryPrompt('movies');
 }
 
