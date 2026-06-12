@@ -6,6 +6,7 @@
 import { getVodInfo, getSeriesInfo } from '../api/xtream.js';
 import { proxyImageUrl } from '../utils/imageProxy.js';
 import { bindAllImageShimmers } from '../utils/imageLoad.js';
+import { mountRandomLoader } from '../utils/loader.js';
 
 const PLACEHOLDER_SVG = `
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -55,6 +56,7 @@ export async function openVodModal(item, getItemListsFn) {
   loadingEl.hidden = false;
   contentEl.hidden = true;
   contentEl.innerHTML = '';
+  mountRandomLoader(loadingEl.querySelector('.loader-slot'));
   dialog.showModal();
 
   try {
@@ -109,6 +111,7 @@ export async function openSeriesModal(item, getItemListsFn) {
   loadingEl.hidden = false;
   contentEl.hidden = true;
   contentEl.innerHTML = '';
+  mountRandomLoader(loadingEl.querySelector('.loader-slot'));
   dialog.showModal();
 
   try {

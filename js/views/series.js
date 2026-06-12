@@ -11,6 +11,7 @@ import { paginate, renderPagination, DEFAULT_PAGE_SIZE } from '../components/pag
 import { openSeriesModal } from '../components/modal.js';
 import { createGenreFilter, parseGenreString } from '../components/genreFilter.js';
 import { setupViewToolbar } from '../components/toolbarCollapse.js';
+import { mountRandomLoader } from '../utils/loader.js';
 
 let _pin = null;
 let _allItems   = [];
@@ -215,7 +216,11 @@ function showPickCategoryPrompt(prefix) {
 }
 
 function setLoading(prefix, on) {
-  document.getElementById(`${prefix}-loading`).hidden = !on;
+  const loadingEl = document.getElementById(`${prefix}-loading`);
+  if (on) {
+    mountRandomLoader(loadingEl?.querySelector('.loader-slot'));
+  }
+  loadingEl.hidden = !on;
   document.getElementById(`${prefix}-grid`).style.display = on ? 'none' : '';
   if (on) document.getElementById(`${prefix}-pagination`).innerHTML = '';
 }

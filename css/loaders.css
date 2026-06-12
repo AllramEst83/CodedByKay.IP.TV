@@ -1,0 +1,217 @@
+/* =========================================
+   Fun loaders (randomized on each show)
+   ========================================= */
+
+.loader-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  overflow: visible;
+  /* Reserve space for pseudo-elements that extend below each loader */
+  min-height: 260px;
+  padding: 20px 16px 52px;
+}
+
+.loading--compact .loader-slot {
+  min-height: 165px;
+  padding: 8px 16px 28px;
+}
+
+.loading--compact .fun-loader {
+  transform: scale(0.62);
+  transform-origin: center center;
+}
+
+.fun-loader {
+  display: inline-block;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 0;
+}
+
+/* ── Washing machine ───────────────────────────────────────── */
+
+.fun-loader--washing-machine {
+  width: 120px;
+  height: 150px;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(#ddd 50%, #bbb 51%),
+    linear-gradient(#ddd, #ddd),
+    linear-gradient(#ddd, #ddd),
+    radial-gradient(ellipse at center, #aaa 25%, #eee 26%, #eee 50%, #0000 55%),
+    radial-gradient(ellipse at center, #aaa 25%, #eee 26%, #eee 50%, #0000 55%),
+    radial-gradient(ellipse at center, #aaa 25%, #eee 26%, #eee 50%, #0000 55%);
+  background-position: 0 20px, 45px 0, 8px 6px, 55px 3px, 75px 3px, 95px 3px;
+  background-size: 100% 4px, 1px 23px, 30px 8px, 15px 15px, 15px 15px, 15px 15px;
+  position: relative;
+  border-radius: 6%;
+  animation: loader-washing-machine-shake 3s ease-in-out infinite;
+  transform-origin: 60px 180px;
+}
+
+.fun-loader--washing-machine::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 100%;
+  width: 7px;
+  height: 5px;
+  background: #aaa;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 102px 0 #aaa;
+}
+
+.fun-loader--washing-machine::after {
+  content: "";
+  position: absolute;
+  width: 95px;
+  height: 95px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  bottom: 20px;
+  background-color: #bbdefb;
+  background-image:
+    linear-gradient(to right, #0004 0%, #0004 49%, #0000 50%, #0000 100%),
+    linear-gradient(135deg, #64b5f6 50%, #607d8b 51%);
+  background-size: 30px 100%, 90px 80px;
+  border-radius: 50%;
+  background-repeat: repeat, no-repeat;
+  background-position: 0 0;
+  box-sizing: border-box;
+  border: 10px solid #ddd;
+  box-shadow: 0 0 0 4px #999 inset, 0 0 6px 6px #0004 inset;
+  animation: loader-washing-machine-spin 3s ease-in-out infinite;
+}
+
+@keyframes loader-washing-machine-spin {
+  0%   { transform: rotate(0deg); }
+  50%  { transform: rotate(360deg); }
+  75%  { transform: rotate(750deg); }
+  100% { transform: rotate(1800deg); }
+}
+
+@keyframes loader-washing-machine-shake {
+  65%, 80%, 88%, 96% { transform: rotate(0.5deg); }
+  50%, 75%, 84%, 92% { transform: rotate(-0.5deg); }
+  0%, 50%, 100%       { transform: rotate(0); }
+}
+
+/* ── Ice cream ───────────────────────────────────────────── */
+
+.fun-loader--ice-cream {
+  height: 150px;
+  width: 100px;
+  border-radius: 55px 55px 10px 10px;
+  position: relative;
+  background: #ff3d00;
+  background-image: linear-gradient(
+    0deg,
+    #f63a99 25%,
+    #30dcf6 25%,
+    #30dcf6 50%,
+    #f2d200 50%,
+    #f2d200 75%,
+    #70ca5c 75%
+  );
+  background-position: 0 0;
+  background-size: auto 175px;
+  background-repeat: repeat-y;
+  animation: loader-ice-cream-shift 6s linear infinite;
+}
+
+.fun-loader--ice-cream::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  bottom: 15px;
+  width: 15px;
+  height: 100px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.fun-loader--ice-cream::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 0);
+  box-shadow: 0 15px 2px rgba(0, 0, 0, 0.25) inset;
+  width: 32px;
+  height: 45px;
+  background: #e09c5f;
+  border-radius: 0 0 12px 12px;
+}
+
+@keyframes loader-ice-cream-shift {
+  to { background-position: 0 175px; }
+}
+
+/* ── Polar bear ──────────────────────────────────────────── */
+
+.fun-loader--polar-bear {
+  width: 160px;
+  height: 185px;
+  position: relative;
+  background: #fff;
+  border-radius: 100px 100px 0 0;
+}
+
+.fun-loader--polar-bear::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 125px;
+  left: 50%;
+  top: 25px;
+  transform: translateX(-50%);
+  background-image:
+    radial-gradient(circle, #000 48%, transparent 55%),
+    radial-gradient(circle, #000 48%, transparent 55%),
+    radial-gradient(circle, #fff 30%, transparent 45%),
+    radial-gradient(circle, #000 48%, transparent 51%),
+    linear-gradient(#000 20px, transparent 0),
+    linear-gradient(#cfecf9 60px, transparent 0),
+    radial-gradient(circle, #cfecf9 50%, transparent 51%),
+    radial-gradient(circle, #cfecf9 50%, transparent 51%);
+  background-repeat: no-repeat;
+  background-size:
+    16px 16px, 16px 16px, 10px 10px, 42px 42px,
+    12px 3px, 50px 25px, 70px 70px, 70px 70px;
+  background-position:
+    25px 10px, 55px 10px, 36px 44px, 50% 30px,
+    50% 85px, 50% 50px, 50% 22px, 50% 45px;
+  animation: loader-polar-bear-face 3s linear infinite alternate;
+}
+
+.fun-loader--polar-bear::before {
+  content: "";
+  position: absolute;
+  width: 140%;
+  height: 125px;
+  left: -20%;
+  top: 0;
+  background-image:
+    radial-gradient(circle, #fff 48%, transparent 50%),
+    radial-gradient(circle, #fff 48%, transparent 50%);
+  background-repeat: no-repeat;
+  background-size: 65px 65px;
+  background-position: 0 12px, 145px 12px;
+  animation: loader-polar-bear-ear 3s linear infinite alternate;
+}
+
+@keyframes loader-polar-bear-face {
+  0%   { transform: translateX(-60%); }
+  100% { transform: translateX(-30%); }
+}
+
+@keyframes loader-polar-bear-ear {
+  0%   { transform: translateX(10px); }
+  100% { transform: translateX(0); }
+}

@@ -69,39 +69,73 @@ const store = {
 
 window.__iptv_store__ = store;
 
-// ─── Theme Toggle ─────────────────────────────────────────────────────────────
+// ─── Theme menu ───────────────────────────────────────────────────────────────
 
 const THEME_KEY = 'iptv-hub-theme';
+const VALID_THEMES = new Set(['dark', 'light', 'autumn', 'unicorn']);
 
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem(THEME_KEY, theme);
+function updateThemeMenuState(theme) {
+  document.querySelectorAll('.theme-option').forEach((btn) => {
+    const active = btn.dataset.theme === theme;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-checked', String(active));
+  });
 }
 
-// Load saved theme
+function applyTheme(theme) {
+  const safe = VALID_THEMES.has(theme) ? theme : 'dark';
+  document.documentElement.setAttribute('data-theme', safe);
+  localStorage.setItem(THEME_KEY, safe);
+  updateThemeMenuState(safe);
+}
+
 const savedTheme = localStorage.getItem(THEME_KEY) ?? 'dark';
 applyTheme(savedTheme);
 
-document.getElementById('theme-toggle-btn')?.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
-  applyTheme(current === 'dark' ? 'light' : 'dark');
+const themeMenuBtn  = document.getElementById('theme-menu-btn');
+const themeDropdown = document.getElementById('theme-dropdown');
+const userMenuBtn   = document.getElementById('user-menu-btn');
+const userDropdown  = document.getElementById('user-dropdown');
+
+function closeHeaderMenus() {
+  themeDropdown?.classList.remove('is-open');
+  userDropdown?.classList.remove('is-open');
+  themeMenuBtn?.setAttribute('aria-expanded', 'false');
+  userMenuBtn?.setAttribute('aria-expanded', 'false');
+}
+
+themeMenuBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const willOpen = !themeDropdown.classList.contains('is-open');
+  closeHeaderMenus();
+  if (willOpen) {
+    themeDropdown.classList.add('is-open');
+    themeMenuBtn.setAttribute('aria-expanded', 'true');
+  }
+});
+
+themeDropdown?.addEventListener('click', (e) => e.stopPropagation());
+
+document.querySelectorAll('.theme-option').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    applyTheme(btn.dataset.theme);
+    closeHeaderMenus();
+  });
 });
 
 // ─── User Dropdown ────────────────────────────────────────────────────────────
 
-const userMenuBtn  = document.getElementById('user-menu-btn');
-const userDropdown = document.getElementById('user-dropdown');
-
 userMenuBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
-  const isOpen = userDropdown.classList.toggle('is-open');
-  userMenuBtn.setAttribute('aria-expanded', String(isOpen));
+  const willOpen = !userDropdown.classList.contains('is-open');
+  closeHeaderMenus();
+  if (willOpen) {
+    userDropdown.classList.add('is-open');
+    userMenuBtn.setAttribute('aria-expanded', 'true');
+  }
 });
 
-document.addEventListener('click', () => {
-  userDropdown?.classList.remove('is-open');
-  userMenuBtn?.setAttribute('aria-expanded', 'false');
-});
+document.addEventListener('click', closeHeaderMenus);
 
 userDropdown?.addEventListener('click', (e) => e.stopPropagation());
 
