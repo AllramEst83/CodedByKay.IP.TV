@@ -16,11 +16,13 @@ const STAR_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true
 
 let _pin = null;
 let _onListAction = null;
+let _onDetailClose = null;
 
 /** @param {string} pin */
-export function initModal(pin, onListAction) {
+export function initModal(pin, onListAction, onDetailClose) {
   _pin = pin;
   _onListAction = onListAction;
+  _onDetailClose = onDetailClose;
 
   const dialog = document.getElementById('detail-modal');
   const closeBtn = dialog.querySelector('.modal-close');
@@ -33,6 +35,10 @@ export function initModal(pin, onListAction) {
 
   dialog.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') dialog.close();
+  });
+
+  dialog.addEventListener('close', () => {
+    _onDetailClose?.();
   });
 }
 
@@ -125,6 +131,9 @@ function renderModalContent(container, { title, poster, backdrop, rating, year, 
   const rating_num = parseFloat(rating ?? 0);
   const listsContaining = getItemListsFn?.(item) ?? [];
 
+  // Build star display (out of 5)
+  const starsHtml = rating_num > 0 ? buildStars(rating_num) : '';
+
   container.innerHTML = `
     ${backdrop ? `<div class="modal-backdrop" style="background-image:url('${escapeAttr(backdrop)}')" aria-hidden="true"></div>` : ''}
     <div class="modal-detail">
@@ -137,23 +146,29 @@ function renderModalContent(container, { title, poster, backdrop, rating, year, 
       <div class="modal-info-col">
         <h2 class="modal-info-title">${escapeHtml(title)}</h2>
         <div class="modal-meta-row">
-          ${rating_num > 0 ? `<span class="modal-badge rating">${STAR_SVG} ${rating_num.toFixed(1)}</span>` : ''}
+          ${rating_num > 0 ? `
+            <span class="modal-stars" aria-label="Rating ${rating_num.toFixed(1)} out of 10">
+              ${starsHtml}
+            </span>
+            <span class="modal-rating-num">${rating_num.toFixed(1)}</span>
+          ` : ''}
           ${year ? `<span class="modal-badge">${escapeHtml(year)}</span>` : ''}
           ${genre ? genre.split(',').map(g => g.trim()).filter(Boolean).map(g => `<span class="modal-badge">${escapeHtml(g)}</span>`).join('') : ''}
-          ${director ? `<span class="modal-badge">Regi: ${escapeHtml(director)}</span>` : ''}
+          ${director ? `<span class="modal-badge">Dir: ${escapeHtml(director)}</span>` : ''}
         </div>
         ${plot ? `<p class="modal-plot">${escapeHtml(plot)}</p>` : ''}
         ${cast ? `
-          <p class="modal-section-label">Medverkande</p>
+          <p class="modal-section-label">Cast</p>
           <p class="modal-cast">${escapeHtml(cast)}</p>
         ` : ''}
         <div class="modal-actions">
           <button class="btn btn-primary js-manage-lists" type="button">
-            ${listsContaining.length > 0 ? '✓ Hantera i listor' : '+ Lägg till i lista'}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            ${listsContaining.length > 0 ? 'Manage Lists' : 'Add to List'}
           </button>
         </div>
         ${listsContaining.length > 0
-          ? `<p style="margin-top:8px;font-size:.8rem;color:var(--text-muted)">Finns i: ${listsContaining.map(escapeHtml).join(', ')}</p>`
+          ? `<p style="margin-top:10px;font-size:.8rem;color:var(--text-muted)">In lists: ${listsContaining.map(escapeHtml).join(', ')}</p>`
           : ''}
       </div>
     </div>
@@ -162,6 +177,16 @@ function renderModalContent(container, { title, poster, backdrop, rating, year, 
   container.querySelector('.js-manage-lists')?.addEventListener('click', () => {
     _onListAction?.(item, type);
   });
+}
+
+function buildStars(rating10) {
+  // rating10 is 0–10; display as 5 stars
+  const filled = Math.round((rating10 / 10) * 5);
+  const STAR_FULL  = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+  const STAR_EMPTY = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+  let html = '';
+  for (let i = 0; i < 5; i++) html += i < filled ? STAR_FULL : STAR_EMPTY;
+  return html;
 }
 
 // ─── Lists modal (add/remove from list) ───────────────────────────────────────

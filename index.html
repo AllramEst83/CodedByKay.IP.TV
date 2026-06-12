@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="sv" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IPTV Hub</title>
+  <title>IPTV Hub — Stream Everything</title>
+  <meta name="description" content="IPTV Hub — your personal streaming dashboard. Browse movies, series, and manage your watchlists." />
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
@@ -11,18 +12,26 @@
   <!-- ========== PIN LOGIN SCREEN ========== -->
   <div id="login-screen" class="login-screen">
     <div class="login-card">
+      <!-- Logo -->
       <div class="login-logo">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect width="48" height="48" rx="12" fill="var(--accent)"/>
-          <path d="M14 16L24 24L14 32V16Z" fill="white"/>
-          <rect x="26" y="16" width="8" height="16" rx="2" fill="white"/>
+        <svg class="logo-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="44" height="44" rx="12" fill="url(#lg1)"/>
+          <path d="M13 15L24 22L13 29V15Z" fill="white"/>
+          <rect x="27" y="15" width="7" height="14" rx="2" fill="white"/>
+          <defs>
+            <linearGradient id="lg1" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#C490E4"/>
+              <stop offset="100%" stop-color="#FFB380"/>
+            </linearGradient>
+          </defs>
         </svg>
         <span>IPTV Hub</span>
       </div>
-      <h1>Ange PIN-kod</h1>
+
+      <h1>Enter your PIN</h1>
 
       <!-- PIN dots display -->
-      <div class="pin-display" aria-live="polite" aria-label="PIN-inmatning">
+      <div class="pin-display" aria-live="polite" aria-label="PIN input">
         <span class="pin-dot" data-index="0"></span>
         <span class="pin-dot" data-index="1"></span>
         <span class="pin-dot" data-index="2"></span>
@@ -31,10 +40,12 @@
         <span class="pin-dot" data-index="5"></span>
       </div>
 
+      <p class="pin-paste-hint">You can also paste or type your PIN directly</p>
+
       <p id="login-error" class="error-msg" role="alert" hidden></p>
 
       <!-- PIN Keypad -->
-      <div class="pin-keypad" role="group" aria-label="Numerisk knappsats">
+      <div class="pin-keypad" role="group" aria-label="Numeric keypad">
         <button class="key-btn" data-digit="1" type="button">1</button>
         <button class="key-btn" data-digit="2" type="button">2</button>
         <button class="key-btn" data-digit="3" type="button">3</button>
@@ -46,13 +57,13 @@
         <button class="key-btn" data-digit="9" type="button">9</button>
         <button class="key-btn key-empty" type="button" disabled aria-hidden="true"></button>
         <button class="key-btn" data-digit="0" type="button">0</button>
-        <button class="key-btn key-backspace" id="pin-backspace" type="button" aria-label="Radera">
+        <button class="key-btn key-backspace" id="pin-backspace" type="button" aria-label="Delete">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
         </button>
       </div>
 
       <button type="button" id="pin-submit" class="btn btn-primary btn-full" disabled>
-        <span class="btn-label">Logga in</span>
+        <span class="btn-label">Sign In</span>
         <span class="btn-spinner" hidden aria-hidden="true"></span>
       </button>
     </div>
@@ -61,68 +72,96 @@
   <!-- ========== MAIN APP ========== -->
   <div id="app" class="app" hidden>
     <header class="app-header">
+      <!-- Brand -->
       <div class="header-brand">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect width="48" height="48" rx="12" fill="var(--accent)"/>
-          <path d="M14 16L24 24L14 32V16Z" fill="white"/>
-          <rect x="26" y="16" width="8" height="16" rx="2" fill="white"/>
+        <svg class="logo-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="44" height="44" rx="12" fill="url(#lg2)"/>
+          <path d="M13 15L24 22L13 29V15Z" fill="white"/>
+          <rect x="27" y="15" width="7" height="14" rx="2" fill="white"/>
+          <defs>
+            <linearGradient id="lg2" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#C490E4"/>
+              <stop offset="100%" stop-color="#FFB380"/>
+            </linearGradient>
+          </defs>
         </svg>
         <span class="brand-name">IPTV Hub</span>
       </div>
-      <nav class="main-nav" role="navigation" aria-label="Primär navigation">
-        <button class="nav-btn is-active" data-view="movies" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 4v16M17 4v16M2 12h20M2 8h5M17 8h5M2 16h5M17 16h5"/></svg>
-          Filmer
+
+      <!-- Nav -->
+      <nav class="main-nav" role="navigation" aria-label="Main navigation">
+        <button class="nav-btn" data-view="movies" type="button">
+          Movies
         </button>
         <button class="nav-btn" data-view="series" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 2l-4 5-4-5"/><path d="M12 12v5"/><path d="M9.5 14.5l2.5-2.5 2.5 2.5"/></svg>
-          Serier
+          Series
         </button>
         <button class="nav-btn" data-view="lists" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-          Mina Listor
+          My Lists
         </button>
       </nav>
+
+      <!-- Actions -->
       <div class="header-actions">
-        <button id="clear-cache-btn" class="btn btn-ghost btn-sm" type="button" title="Rensa cache och hämta ny data">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-          Rensa cache
+        <!-- Theme toggle -->
+        <button id="theme-toggle-btn" class="theme-toggle" type="button" aria-label="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </button>
-        <button id="logout-btn" class="btn btn-ghost btn-sm" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Logga ut
+
+        <!-- Search icon -->
+        <button class="header-icon-btn" type="button" aria-label="Search" id="header-search-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
+
+        <!-- User avatar / dropdown trigger -->
+        <button class="user-avatar-btn" id="user-menu-btn" type="button" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+
+        <!-- Dropdown menu -->
+        <div class="user-dropdown" id="user-dropdown" role="menu">
+          <button class="dropdown-item" id="clear-cache-btn" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            Refresh Cache
+          </button>
+          <div class="dropdown-divider" role="separator"></div>
+          <button class="dropdown-item danger" id="logout-btn" type="button" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+          </button>
+        </div>
       </div>
     </header>
 
     <main class="app-main">
       <!-- MOVIES VIEW -->
-      <section id="view-movies" class="view is-active" aria-label="Filmer">
+      <section id="view-movies" class="view is-active" aria-label="Movies">
         <div class="view-toolbar">
           <div class="toolbar-left">
-            <select id="movies-category" class="select" aria-label="Välj filmkategori">
-              <option value="">Alla kategorier</option>
+            <select id="movies-category" class="select" aria-label="Filter by category">
+              <option value="" disabled selected>Pick a category…</option>
             </select>
           </div>
           <div class="toolbar-right">
             <div class="search-wrap">
               <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input id="movies-search" type="search" class="search-input" placeholder="Sök filmer…" aria-label="Sök filmer" />
+              <input id="movies-search" type="search" class="search-input" placeholder="Search movies…" aria-label="Search movies" />
             </div>
-            <select id="movies-sort" class="select select-sm" aria-label="Sortera filmer">
-              <option value="name">Namn A–Ö</option>
-              <option value="rating">Betyg (högst)</option>
-              <option value="added">Nyast tillagd</option>
+            <select id="movies-sort" class="select select-sm" aria-label="Sort movies">
+              <option value="name">Name A–Z</option>
+              <option value="rating">Top Rated</option>
+              <option value="added">Newest First</option>
             </select>
           </div>
         </div>
-        <div id="movies-genre-filter" class="genre-filter-bar" hidden aria-label="Filtrera på genre"></div>
+        <div id="movies-genre-filter" class="genre-filter-bar" hidden aria-label="Filter by genre"></div>
         <div class="view-body">
           <div id="movies-loading" class="loading" aria-busy="true" hidden>
             <div class="spinner"></div>
-            <span>Laddar…</span>
+            <span>Loading…</span>
           </div>
-          <p id="movies-empty" class="empty-state" hidden>Inget innehåll hittades.</p>
+          <p id="movies-empty" class="empty-state" hidden>No content found.</p>
           <div id="movies-grid" class="content-grid" role="list"></div>
         </div>
         <div class="view-footer">
@@ -131,32 +170,32 @@
       </section>
 
       <!-- SERIES VIEW -->
-      <section id="view-series" class="view" aria-label="Serier" hidden>
+      <section id="view-series" class="view" aria-label="Series" hidden>
         <div class="view-toolbar">
           <div class="toolbar-left">
-            <select id="series-category" class="select" aria-label="Välj seriekategori">
-              <option value="">Alla kategorier</option>
+            <select id="series-category" class="select" aria-label="Filter by category">
+              <option value="" disabled selected>Pick a category…</option>
             </select>
           </div>
           <div class="toolbar-right">
             <div class="search-wrap">
               <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input id="series-search" type="search" class="search-input" placeholder="Sök serier…" aria-label="Sök serier" />
+              <input id="series-search" type="search" class="search-input" placeholder="Search series…" aria-label="Search series" />
             </div>
-            <select id="series-sort" class="select select-sm" aria-label="Sortera serier">
-              <option value="name">Namn A–Ö</option>
-              <option value="rating">Betyg (högst)</option>
-              <option value="added">Nyast tillagd</option>
+            <select id="series-sort" class="select select-sm" aria-label="Sort series">
+              <option value="name">Name A–Z</option>
+              <option value="rating">Top Rated</option>
+              <option value="added">Newest First</option>
             </select>
           </div>
         </div>
-        <div id="series-genre-filter" class="genre-filter-bar" hidden aria-label="Filtrera på genre"></div>
+        <div id="series-genre-filter" class="genre-filter-bar" hidden aria-label="Filter by genre"></div>
         <div class="view-body">
           <div id="series-loading" class="loading" aria-busy="true" hidden>
             <div class="spinner"></div>
-            <span>Laddar…</span>
+            <span>Loading…</span>
           </div>
-          <p id="series-empty" class="empty-state" hidden>Inget innehåll hittades.</p>
+          <p id="series-empty" class="empty-state" hidden>No content found.</p>
           <div id="series-grid" class="content-grid" role="list"></div>
         </div>
         <div class="view-footer">
@@ -165,25 +204,25 @@
       </section>
 
       <!-- LISTS VIEW -->
-      <section id="view-lists" class="view" aria-label="Mina Listor" hidden>
+      <section id="view-lists" class="view" aria-label="My Lists" hidden>
         <div class="view-toolbar">
           <div class="lists-create">
-            <input id="new-list-name" type="text" class="input" placeholder="Namn på ny lista…" aria-label="Namn på ny lista" maxlength="60" />
-            <button id="create-list-btn" class="btn btn-primary btn-sm" type="button">Skapa lista</button>
+            <input id="new-list-name" type="text" class="input" placeholder="New list name…" aria-label="New list name" maxlength="60" />
+            <button id="create-list-btn" class="btn btn-primary btn-sm" type="button">Create List</button>
           </div>
           <div class="search-wrap">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input id="lists-search" type="search" class="search-input" placeholder="Sök i listan…" aria-label="Sök i aktiv lista" />
+            <input id="lists-search" type="search" class="search-input" placeholder="Search in list…" aria-label="Search active list" />
           </div>
         </div>
         <div class="view-body view-body--lists">
           <div class="lists-layout">
             <div class="lists-sidebar">
-              <div id="lists-tabs" class="lists-tabs" role="tablist" aria-label="Mina listor"></div>
-              <button id="delete-list-btn" class="btn btn-danger btn-sm btn-full" type="button" hidden>Ta bort lista</button>
+              <div id="lists-tabs" class="lists-tabs" role="tablist" aria-label="My lists"></div>
+              <button id="delete-list-btn" class="btn btn-danger btn-sm btn-full" type="button" hidden>Delete List</button>
             </div>
             <div class="lists-content">
-              <p id="lists-empty" class="empty-state">Skapa en lista för att komma igång.</p>
+              <p id="lists-empty" class="empty-state">Create a list to get started.</p>
               <div id="lists-grid" class="content-grid" role="list"></div>
             </div>
           </div>
@@ -193,27 +232,31 @@
   </div>
 
   <!-- ========== DETAIL MODAL ========== -->
-  <dialog id="detail-modal" class="detail-modal" aria-label="Detaljinformation">
+  <dialog id="detail-modal" class="detail-modal" aria-label="Item details">
     <div class="modal-inner">
-      <button class="modal-close" type="button" aria-label="Stäng">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div id="modal-loading" class="loading" aria-busy="true">
-        <div class="spinner spinner-lg"></div>
-        <span>Hämtar information…</span>
+      <div class="modal-inner-scroll">
+        <button class="modal-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div id="modal-loading" class="loading" aria-busy="true">
+          <div class="spinner spinner-lg"></div>
+          <span>Fetching info…</span>
+        </div>
+        <div id="modal-content" class="modal-content" hidden></div>
       </div>
-      <div id="modal-content" class="modal-content" hidden></div>
     </div>
   </dialog>
 
   <!-- ========== ADD-TO-LIST MODAL ========== -->
-  <dialog id="lists-modal" class="lists-modal" aria-label="Hantera listor">
+  <dialog id="lists-modal" class="lists-modal" aria-label="Manage lists">
     <div class="modal-inner modal-inner-sm">
-      <button class="modal-close" type="button" aria-label="Stäng">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <h2 class="modal-title">Lägg till i lista</h2>
-      <div id="lists-modal-body" class="lists-modal-body"></div>
+      <div class="modal-inner-scroll">
+        <button class="modal-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <h2 class="modal-title">Add to List</h2>
+        <div id="lists-modal-body" class="lists-modal-body"></div>
+      </div>
     </div>
   </dialog>
 

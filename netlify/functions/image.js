@@ -76,9 +76,7 @@ export default async function handler(req) {
       return new Response(null, { status: 415 });
     }
 
-    const body = await upstream.arrayBuffer();
-
-    return new Response(body, {
+    return new Response(upstream.body, {
       status: 200,
       headers: {
         'Content-Type': contentType || 'image/jpeg',

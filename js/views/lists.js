@@ -4,7 +4,6 @@
 
 import { renderGrid, sortItems } from '../components/grid.js';
 import { initSearch, filterItems } from '../components/search.js';
-import { openListsModal } from '../components/modal.js';
 
 let _activeList = null;
 let _query = '';
@@ -34,7 +33,7 @@ export function initListsView(store) {
 
   deleteBtn.addEventListener('click', () => {
     if (!_activeList) return;
-    const confirmed = window.confirm(`Ta bort listan "${_activeList}"?`);
+    const confirmed = window.confirm(`Delete the list "${_activeList}"?`);
     if (!confirmed) return;
     store.deleteList(_activeList);
     _activeList = null;
@@ -97,8 +96,8 @@ function renderActiveList(store) {
     grid.innerHTML = '';
     emptyEl.hidden = false;
     emptyEl.textContent = store.getLists().size === 0
-      ? 'Skapa en lista för att komma igång.'
-      : 'Välj en lista.';
+      ? 'Create a list to get started.'
+      : 'Select a list.';
     return;
   }
 
@@ -109,16 +108,15 @@ function renderActiveList(store) {
   if (items.length === 0) {
     grid.innerHTML = '';
     emptyEl.hidden = false;
-    emptyEl.textContent = _query ? 'Inget innehåll hittades.' : 'Listan är tom.';
+    emptyEl.textContent = _query ? 'No content found.' : 'This list is empty.';
     return;
   }
 
   emptyEl.hidden = true;
 
   renderGrid(grid, items, {
-    onSelect: (item) => {
-      store.openListsModal(item);
-    },
+    onSelect:     (item) => store.openListsModal(item),
+    onAddToList:  (item) => store.openListsModal(item),
     getListCount: (item) => store.getItemLists(item).length,
   });
 }

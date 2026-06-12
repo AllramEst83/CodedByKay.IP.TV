@@ -1,45 +1,120 @@
 /* =========================================
-   IPTV Hub — Global Styles
+   IPTV Hub — Design System v2
+   Pastel Palette: Sunset Peach · Dreamy Lavender · Mint Fresh · Sky Mist
    ========================================= */
 
-/* --- Custom Properties --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* --- CSS Custom Properties (Dark Theme — default) --- */
 :root {
-  --bg: #0f1117;
-  --bg-card: #1a1d27;
-  --bg-card-hover: #22263a;
-  --bg-elevated: #232634;
-  --bg-overlay: rgba(0, 0, 0, 0.75);
-  --border: #2e3148;
-  --border-focus: #6c63ff;
+  /* Pastel Brand Colors */
+  --peach:       #FFB380;
+  --peach-light: #ffd0b0;
+  --peach-dim:   rgba(255, 179, 128, 0.15);
+  --lavender:    #C490E4;
+  --lavender-dim: rgba(196, 144, 228, 0.15);
+  --mint:        #98E2C6;
+  --mint-dim:    rgba(152, 226, 198, 0.12);
+  --sky:         #A0C4FF;
+  --sky-dim:     rgba(160, 196, 255, 0.12);
 
-  --text: #e8eaf6;
-  --text-muted: #9098b8;
-  --text-dim: #5a6080;
+  /* Gradients */
+  --grad-morning: linear-gradient(90deg, #FFB380 0%, #C490E4 50%, #98E2C6 100%);
+  --grad-twilight: linear-gradient(90deg, #C490E4 0%, #A0C4FF 50%, #98E2C6 100%);
 
-  --accent: #6c63ff;
-  --accent-hover: #5a53e8;
-  --accent-glow: rgba(108, 99, 255, 0.25);
+  /* Dark backgrounds */
+  --bg:           #13141f;
+  --bg-card:      #1c1d2e;
+  --bg-card-hover:#242540;
+  --bg-elevated:  #2a2b40;
+  --bg-overlay:   rgba(10, 10, 20, 0.85);
 
-  --danger: #e05260;
+  /* Borders */
+  --border:       #2e3050;
+  --border-focus: #C490E4;
+
+  /* Text */
+  --text:         #eaecf8;
+  --text-heading: #f8f9ff;
+  --text-muted:   #8890b8;
+  --text-dim:     #4e5478;
+
+  /* Accent — Dreamy Lavender as primary */
+  --accent:       #C490E4;
+  --accent-hover: #b07ed8;
+  --accent-glow:  rgba(196, 144, 228, 0.28);
+
+  /* Primary button — Sunset Peach */
+  --primary:      #FFB380;
+  --primary-hover:#f0a070;
+  --primary-glow: rgba(255, 179, 128, 0.28);
+  --primary-text: #1a0e00;
+
+  /* Semantic */
+  --danger:       #e05260;
   --danger-hover: #c94254;
+  --success:      #98E2C6;
 
-  --success: #3dd68c;
+  /* Radii */
+  --radius-xs:  4px;
+  --radius-sm:  8px;
+  --radius:     12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+  --radius-2xl: 28px;
 
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* Shadows */
+  --shadow:      0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 24px var(--accent-glow);
 
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3);
+  /* Motion */
+  --ease:       cubic-bezier(0.22, 1, 0.36, 1);
+  --transition: 0.18s var(--ease);
+  --trans-slow: 0.3s var(--ease);
 
-  --transition: 0.18s ease;
-
-  --header-h: 64px;
-  --sidebar-w: 220px;
+  /* Layout */
+  --header-h:  68px;
+  --sidebar-w: 240px;
 }
 
-/* --- Reset & Base --- */
+/* --- Light Theme --- */
+[data-theme="light"] {
+  --bg:           #f8f6ff;
+  --bg-card:      #ffffff;
+  --bg-card-hover:#f0eeff;
+  --bg-elevated:  #ede9ff;
+  --bg-overlay:   rgba(20, 10, 50, 0.6);
+
+  --border:       #ddd8f5;
+  --border-focus: #C490E4;
+
+  --text:         #1a1730;
+  --text-heading: #0d0b18;
+  --text-muted:   #6b6490;
+  --text-dim:     #a8a0c8;
+
+  --accent:       #C490E4;
+  --accent-hover: #b07ed8;
+  --accent-glow:  rgba(196, 144, 228, 0.22);
+
+  --primary:      #FFB380;
+  --primary-hover:#f0a070;
+  --primary-glow: rgba(255, 179, 128, 0.22);
+  --primary-text: #3a1800;
+
+  --danger:       #e05260;
+  --danger-hover: #c94254;
+  --success:      #38b98a;
+
+  --shadow:      0 8px 32px rgba(100, 80, 180, 0.14);
+  --shadow-card: 0 2px 12px rgba(100, 80, 180, 0.1);
+}
+
+/* =========================================
+   RESET & BASE
+   ========================================= */
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -56,9 +131,10 @@ body {
   min-height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  transition: background var(--trans-slow), color var(--trans-slow);
 }
 
 img {
@@ -80,41 +156,104 @@ dialog {
   border: none;
   padding: 0;
   background: transparent;
+  color: var(--text);
 }
 
 dialog::backdrop {
   background: var(--bg-overlay);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
 }
+
+/* =========================================
+   THEME TOGGLE BUTTON
+   ========================================= */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-card-hover);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: opacity var(--transition);
+}
+
+.theme-toggle .icon-sun  { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+[data-theme="light"] .theme-toggle .icon-sun  { display: block; }
+[data-theme="light"] .theme-toggle .icon-moon { display: none; }
 
 /* =========================================
    LOGIN SCREEN
    ========================================= */
 
+html:has(#login-screen:not([hidden])) {
+  overflow: hidden;
+}
+
 .login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  padding: clamp(12px, 2.5vmin, 24px);
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(108, 99, 255, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse at 75% 80%, rgba(61, 214, 140, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 20%, rgba(196, 144, 228, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 85%, rgba(255, 179, 128, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 55% 50%, rgba(152, 226, 198, 0.07) 0%, transparent 40%),
     var(--bg);
 }
 
 .login-card {
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
+  max-height: 100%;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 36px 32px;
+  border-radius: var(--radius-2xl);
+  padding: clamp(20px, 3.5vh, 40px) clamp(20px, 4vw, 36px);
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: clamp(10px, 1.8vh, 22px);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--grad-morning);
 }
 
 .login-logo {
@@ -123,34 +262,48 @@ dialog::backdrop {
   gap: 10px;
 }
 
-.login-logo svg {
-  width: 40px;
-  height: 40px;
+.login-logo .logo-icon {
+  width: clamp(36px, 8vmin, 44px);
+  height: clamp(36px, 8vmin, 44px);
   flex-shrink: 0;
 }
 
 .login-logo span {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
+  font-size: clamp(1.2rem, 4vmin, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: var(--grad-morning);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .login-card h1 {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
-  margin: 0;
+  margin: -6px 0 0;
 }
 
-/* ── PIN dots ──────────────────────────────────── */
+/* ── PIN paste hint ──────────────────────────────── */
+
+.pin-paste-hint {
+  font-size: clamp(0.65rem, 2vmin, 0.75rem);
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: clamp(-8px, -1vh, -4px);
+  flex-shrink: 0;
+}
+
+/* ── PIN dots ──────────────────────────────────────── */
 
 .pin-display {
   display: flex;
-  gap: 12px;
+  gap: clamp(10px, 2.5vmin, 14px);
   align-items: center;
   justify-content: center;
-  height: 24px;
+  height: clamp(22px, 4vmin, 28px);
+  flex-shrink: 0;
 }
 
 .pin-dot {
@@ -159,53 +312,66 @@ dialog::backdrop {
   border-radius: 50%;
   background: var(--border);
   border: 2px solid var(--border);
-  transition: background var(--transition), border-color var(--transition), transform 0.1s;
+  transition: background var(--transition), border-color var(--transition), transform 0.12s var(--ease), box-shadow var(--transition);
 }
 
 .pin-dot.filled {
   background: var(--accent);
   border-color: var(--accent);
-  transform: scale(1.15);
+  transform: scale(1.2);
+  box-shadow: 0 0 10px var(--accent-glow);
 }
 
-/* ── PIN Keypad ────────────────────────────────── */
+/* ── PIN Keypad ────────────────────────────────────── */
 
 .pin-keypad {
+  --keypad-h: min(45dvh, calc(100dvh - 20rem), 387px);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 280px;
+  grid-template-rows: repeat(4, 1fr);
+  gap: clamp(5px, 1.2vmin, 10px);
+  width: min(290px, 78vw, calc(var(--keypad-h) * 0.75));
+  height: var(--keypad-h);
+  flex-shrink: 1;
+  min-height: 0;
 }
 
 .key-btn {
-  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 0;
+  min-width: 0;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 1.3rem;
-  font-weight: 600;
+  border-radius: clamp(8px, 2vmin, var(--radius));
+  font-size: clamp(1rem, 2.8vmin, 1.35rem);
+  font-weight: 700;
   color: var(--text);
   cursor: pointer;
-  transition: background var(--transition), border-color var(--transition), transform 0.08s;
+  transition: background var(--transition), border-color var(--transition), transform 0.08s, box-shadow var(--transition);
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .key-btn:hover {
   background: var(--bg-card-hover);
   border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 .key-btn:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
 .key-btn svg {
-  width: 20px;
-  height: 20px;
+  width: clamp(18px, 4vmin, 22px);
+  height: clamp(18px, 4vmin, 22px);
+}
+
+.login-card .btn-full {
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .key-empty {
@@ -220,13 +386,14 @@ dialog::backdrop {
   font-size: 0;
 }
 
-/* ── Fields (used in settings modal) ──────────── */
+/* ── Fields ──────────────────────────────────────── */
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .field label {
@@ -258,7 +425,7 @@ dialog::backdrop {
   color: var(--text-dim);
 }
 
-/* ── Error / Success messages ──────────────────── */
+/* ── Error / Success ──────────────────────────── */
 
 .error-msg {
   color: var(--danger);
@@ -267,7 +434,6 @@ dialog::backdrop {
   background: rgba(224, 82, 96, 0.1);
   border: 1px solid rgba(224, 82, 96, 0.25);
   border-radius: var(--radius-sm);
-  margin-bottom: 12px;
   width: 100%;
 }
 
@@ -275,10 +441,9 @@ dialog::backdrop {
   color: var(--success);
   font-size: 0.875rem;
   padding: 10px 14px;
-  background: rgba(61, 214, 140, 0.08);
-  border: 1px solid rgba(61, 214, 140, 0.25);
+  background: rgba(152, 226, 198, 0.08);
+  border: 1px solid rgba(152, 226, 198, 0.25);
   border-radius: var(--radius-sm);
-  margin-bottom: 12px;
   width: 100%;
 }
 
@@ -290,21 +455,26 @@ dialog::backdrop {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 18px;
+  gap: 7px;
+  padding: 10px 20px;
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: 99px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   cursor: pointer;
-  transition: background var(--transition), box-shadow var(--transition), opacity var(--transition);
+  transition: background var(--transition), box-shadow var(--transition), opacity var(--transition), transform 0.1s;
   white-space: nowrap;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+.btn:not(:disabled):active {
+  transform: scale(0.97);
 }
 
 .btn svg {
@@ -313,25 +483,67 @@ dialog::backdrop {
   flex-shrink: 0;
 }
 
+/* Primary — Sunset Peach */
 .btn-primary {
-  background: var(--accent);
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
 }
 
 .btn-primary:not(:disabled):hover {
-  background: var(--accent-hover);
-  box-shadow: 0 4px 14px var(--accent-glow);
+  background: var(--primary-hover);
+  box-shadow: 0 4px 20px var(--primary-glow);
 }
 
+/* Secondary — Dreamy Lavender */
+.btn-secondary {
+  background: var(--lavender-dim);
+  color: var(--lavender);
+  border-color: var(--accent);
+}
+
+.btn-secondary:not(:disabled):hover {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+/* Outline primary */
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-outline:not(:disabled):hover {
+  background: var(--peach-dim);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+/* Outline secondary — Dreamy Lavender */
+.btn-outline-secondary {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-outline-secondary:not(:disabled):hover {
+  background: var(--lavender-dim);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* Danger */
 .btn-danger {
   background: var(--danger);
   color: #fff;
+  border-color: var(--danger);
 }
 
 .btn-danger:not(:disabled):hover {
   background: var(--danger-hover);
 }
 
+/* Ghost */
 .btn-ghost {
   background: transparent;
   color: var(--text-muted);
@@ -341,11 +553,17 @@ dialog::backdrop {
 .btn-ghost:not(:disabled):hover {
   background: var(--bg-elevated);
   color: var(--text);
+  border-color: var(--accent);
 }
 
 .btn-sm {
-  padding: 7px 13px;
-  font-size: 0.82rem;
+  padding: 7px 16px;
+  font-size: 0.8rem;
+}
+
+.btn-xs {
+  padding: 5px 12px;
+  font-size: 0.75rem;
 }
 
 .btn-full {
@@ -354,12 +572,22 @@ dialog::backdrop {
 
 /* Spinner inside button */
 .btn-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: var(--primary-text);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+}
+
+/* =========================================
+   LOGO ICON SVG
+   ========================================= */
+
+.logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =========================================
@@ -380,12 +608,18 @@ dialog::backdrop {
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   height: var(--header-h);
-  padding: 0 24px;
-  background: rgba(15, 17, 23, 0.88);
-  backdrop-filter: blur(12px);
+  padding: 0 28px;
+  background: rgba(19, 20, 31, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
+  transition: background var(--trans-slow);
+}
+
+[data-theme="light"] .app-header {
+  background: rgba(248, 246, 255, 0.92);
 }
 
 .header-brand {
@@ -393,6 +627,63 @@ dialog::backdrop {
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  text-decoration: none;
+}
+
+.header-brand .logo-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  background: var(--grad-morning);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.main-nav {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 99px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.nav-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-btn:hover {
+  color: var(--text);
+  background: var(--bg-elevated);
+}
+
+.nav-btn.is-active {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .header-actions {
@@ -402,56 +693,122 @@ dialog::backdrop {
   flex-shrink: 0;
 }
 
-
-
-.header-brand svg {
-  width: 32px;
-  height: 32px;
-}
-
-.brand-name {
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-
-.main-nav {
-  display: flex;
-  gap: 4px;
-  flex: 1;
-  justify-content: center;
-}
-
-.nav-btn {
+.header-icon-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 0.9rem;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 50%;
   cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.header-icon-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.header-icon-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* User avatar button */
+.user-avatar-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--lavender-dim);
+  border: 2px solid var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: all var(--transition);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.user-avatar-btn:hover {
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.user-avatar-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Profile dropdown */
+.user-dropdown {
+  position: absolute;
+  top: calc(var(--header-h) - 4px);
+  right: 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 8px;
+  min-width: 200px;
+  box-shadow: var(--shadow);
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  animation: slideDown 0.18s var(--ease);
+}
+
+.user-dropdown.is-open {
+  display: flex;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
   transition: all var(--transition);
 }
 
-.nav-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
-.nav-btn:hover {
+.dropdown-item:hover {
   background: var(--bg-elevated);
   color: var(--text);
 }
 
-.nav-btn.is-active {
-  background: var(--bg-elevated);
-  border-color: var(--border);
-  color: var(--accent);
+.dropdown-item.danger:hover {
+  background: rgba(224, 82, 96, 0.1);
+  color: var(--danger);
+}
+
+.dropdown-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
 }
 
 /* --- Main --- */
@@ -460,17 +817,13 @@ dialog::backdrop {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-width: 1600px;
   width: 100%;
-  margin: 0 auto;
 }
 
 /* =========================================
    VIEWS
    ========================================= */
 
-/* Views use the [hidden] attribute to toggle; display: flex is overridden
-   by the [hidden] { display: none !important } utility rule below. */
 .view {
   display: flex;
   flex-direction: column;
@@ -478,68 +831,27 @@ dialog::backdrop {
   overflow: hidden;
 }
 
-/* --- Toolbar (pinned top) --- */
-.view-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  flex-shrink: 0;
-  padding: 12px 24px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  z-index: 10;
-}
-
-/* --- Scrollable body --- */
-.view-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 24px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.view-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.view-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.view-body::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
-}
-
-/* --- Pagination footer (pinned bottom) --- */
-.view-footer {
-  flex-shrink: 0;
-  padding: 0 24px 12px;
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-}
-
-/* Only show the footer border when pagination is rendered */
-.view-footer:empty,
-.view-footer > div:empty {
-  display: none;
-}
-
-/* --- Genre filter bar (below toolbar) --- */
+/* --- Genre filter bar (chips) --- */
 .genre-filter-bar {
   flex-shrink: 0;
-  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
+  transition: background var(--trans-slow);
+}
+
+/* Scrollable track */
+.genre-chips-track {
+  flex: 1;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  padding: 10px 0;
 }
 
-.genre-filter-bar::-webkit-scrollbar {
+.genre-chips-track::-webkit-scrollbar {
   display: none;
 }
 
@@ -549,26 +861,61 @@ dialog::backdrop {
   gap: 8px;
   white-space: nowrap;
   min-width: max-content;
+  padding: 0 12px;
+}
+
+/* Scroll arrow buttons */
+.genre-scroll-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 100%;
+  min-height: 44px;
+  background: var(--bg);
+  border: none;
+  border-left: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color var(--transition), background var(--transition);
+  z-index: 1;
+}
+
+.genre-scroll-btn:hover {
+  color: var(--accent);
+  background: var(--bg-card);
+}
+
+.genre-scroll-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.genre-scroll-left {
+  order: -1;
+  border-left: none;
+  border-right: 1px solid var(--border);
 }
 
 .genre-chip {
-  padding: 5px 13px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  font-size: 0.78rem;
+  padding: 6px 16px;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
+  font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  transition: all var(--transition);
   white-space: nowrap;
   line-height: 1.4;
 }
 
 .genre-chip:hover {
   border-color: var(--accent);
-  color: var(--text);
-  background: var(--bg-card-hover);
+  color: var(--accent);
+  background: var(--lavender-dim);
 }
 
 .genre-chip.is-active {
@@ -579,16 +926,16 @@ dialog::backdrop {
 }
 
 .genre-clear-btn {
-  padding: 5px 12px;
+  padding: 6px 14px;
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--text-dim);
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  transition: all var(--transition);
   margin-left: 4px;
 }
 
@@ -605,6 +952,21 @@ dialog::backdrop {
   padding: 0 4px;
 }
 
+/* --- Toolbar --- */
+.view-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  padding: 14px 28px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+  transition: background var(--trans-slow);
+}
+
 .toolbar-left,
 .toolbar-right,
 .lists-create {
@@ -614,18 +976,55 @@ dialog::backdrop {
   flex-wrap: wrap;
 }
 
+/* --- Scrollable body --- */
+.view-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.view-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.view-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.view-body::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* --- Pagination footer --- */
+.view-footer {
+  flex-shrink: 0;
+  padding: 0 28px 14px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  transition: background var(--trans-slow);
+}
+
+.view-footer:empty,
+.view-footer > div:empty {
+  display: none;
+}
+
 /* --- Select --- */
 .select {
   appearance: none;
-  background: var(--bg-card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239098b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center / 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 9px 34px 9px 14px;
+  background: var(--bg-card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238890b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center / 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
+  padding: 9px 34px 9px 16px;
   color: var(--text);
   cursor: pointer;
   outline: none;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
   min-width: 180px;
+  font-size: 0.88rem;
 }
 
 .select:focus {
@@ -635,8 +1034,8 @@ dialog::backdrop {
 
 .select-sm {
   min-width: 140px;
-  font-size: 0.85rem;
-  padding: 7px 30px 7px 11px;
+  font-size: 0.82rem;
+  padding: 7px 30px 7px 14px;
 }
 
 /* --- Search --- */
@@ -646,7 +1045,7 @@ dialog::backdrop {
 
 .search-icon {
   position: absolute;
-  left: 11px;
+  left: 13px;
   top: 50%;
   transform: translateY(-50%);
   width: 16px;
@@ -657,12 +1056,13 @@ dialog::backdrop {
 
 .search-input {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 9px 14px 9px 36px;
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
+  padding: 9px 16px 9px 38px;
   color: var(--text);
   outline: none;
   min-width: 220px;
+  font-size: 0.88rem;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 
@@ -676,13 +1076,13 @@ dialog::backdrop {
 }
 
 /* =========================================
-   CONTENT GRID
+   CONTENT GRID & CARDS
    ========================================= */
 
 .content-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 20px;
 }
 
 /* --- Card --- */
@@ -690,16 +1090,18 @@ dialog::backdrop {
   position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   list-style: none;
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   border-color: var(--accent);
 }
 
@@ -728,28 +1130,134 @@ dialog::backdrop {
 .card-poster-placeholder svg {
   width: 40px;
   height: 40px;
-  opacity: 0.4;
+  opacity: 0.35;
+}
+
+/* Rating badge top-right */
+.card-rating-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(19, 20, 31, 0.85);
+  backdrop-filter: blur(4px);
+  color: #FFD700;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  line-height: 1.4;
+}
+
+[data-theme="light"] .card-rating-badge {
+  background: rgba(255, 255, 255, 0.9);
+  color: #c08000;
+  border-color: rgba(192, 128, 0, 0.3);
 }
 
 .card-body {
-  padding: 10px 12px 12px;
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .card-title {
-  font-size: 0.83rem;
+  font-size: 0.84rem;
   font-weight: 600;
   line-height: 1.35;
+  color: var(--text-heading);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  margin-bottom: 4px;
+}
+
+.card-year {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+/* Card action buttons row */
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 2px;
+}
+
+.card-action-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: background var(--transition), border-color var(--transition),
+              color var(--transition), box-shadow var(--transition), transform 0.1s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card-action-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Outline secondary — matches design system card actions */
+.card-action-btn.add-list {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.card-action-btn.add-list:hover {
+  background: var(--lavender-dim);
+  border-color: var(--accent-hover);
+  color: var(--accent-hover);
+  box-shadow: 0 2px 14px var(--accent-glow);
+}
+
+.card-action-btn.add-list:active {
+  transform: scale(0.97);
+}
+
+.card-action-btn.add-list.is-in-list {
+  background: var(--lavender-dim);
+  border-color: var(--accent);
+}
+
+/* In-list badge */
+.card-list-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
 .card-meta {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 6px;
+  margin-top: 4px;
   font-size: 0.75rem;
   color: var(--text-muted);
 }
@@ -768,24 +1276,6 @@ dialog::backdrop {
   fill: currentColor;
 }
 
-/* In-list badge */
-.card-list-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-}
-
 /* =========================================
    LOADING & EMPTY STATES
    ========================================= */
@@ -794,24 +1284,24 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 60px 20px;
+  gap: 16px;
+  padding: 80px 20px;
   color: var(--text-muted);
   font-size: 0.9rem;
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 3px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin 0.75s linear infinite;
 }
 
 .spinner-lg {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-width: 4px;
 }
 
@@ -821,7 +1311,7 @@ dialog::backdrop {
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: var(--text-muted);
   font-size: 0.95rem;
 }
@@ -830,7 +1320,6 @@ dialog::backdrop {
    LISTS VIEW
    ========================================= */
 
-/* lists-toolbar is now a .view-toolbar — only extra list-specific bits needed */
 .lists-create {
   flex: 1;
   min-width: 200px;
@@ -839,9 +1328,9 @@ dialog::backdrop {
 .lists-create .input {
   flex: 1;
   min-width: 0;
+  border-radius: 99px;
 }
 
-/* The view-body for lists fills height and lets the layout scroll */
 .view-body--lists {
   padding: 0;
 }
@@ -875,12 +1364,12 @@ dialog::backdrop {
 .lists-tab {
   width: 100%;
   text-align: left;
-  padding: 9px 14px;
+  padding: 10px 16px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition);
@@ -895,18 +1384,133 @@ dialog::backdrop {
 }
 
 .lists-tab.is-active {
-  background: var(--bg-elevated);
+  background: var(--lavender-dim);
   border-color: var(--accent);
   color: var(--accent);
+  font-weight: 600;
 }
 
 .lists-content {
   flex: 1;
   min-width: 0;
   overflow-y: auto;
-  padding: 20px 24px;
+  padding: 24px 28px;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+}
+
+/* --- My Lists grid cards --- */
+.lists-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  padding: 4px;
+}
+
+.list-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.list-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+
+.list-card-thumbnails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  height: 130px;
+  overflow: hidden;
+}
+
+.list-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--bg-elevated);
+}
+
+.list-card-thumb-placeholder {
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  height: 100%;
+}
+
+.list-card-body {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.list-card-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-card-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.view-all-link {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: opacity var(--transition);
+}
+
+.view-all-link:hover {
+  opacity: 0.75;
+}
+
+/* Create new list card */
+.list-card-create {
+  border: 2px dashed var(--border);
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 180px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all var(--transition);
+  border-radius: var(--radius-lg);
+}
+
+.list-card-create:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--lavender-dim);
+}
+
+.list-card-create .create-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  font-weight: 300;
 }
 
 /* =========================================
@@ -937,19 +1541,31 @@ dialog::backdrop {
   position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-2xl);
   width: 100%;
-  max-width: 860px;
+  max-width: 880px;
   max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  padding: 32px;
+  overflow: hidden;
   box-shadow: var(--shadow);
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  color: var(--text);
+  animation: modalIn 0.24s var(--ease);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .modal-inner-sm {
-  max-width: 420px;
+  max-width: 440px;
+}
+
+.modal-inner-scroll {
+  overflow-y: auto;
+  max-height: calc(100vh - 48px);
+  padding: 32px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
 .modal-close {
@@ -957,17 +1573,17 @@ dialog::backdrop {
   top: 16px;
   right: 16px;
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: var(--text-muted);
   transition: all var(--transition);
-  z-index: 1;
+  z-index: 2;
 }
 
 .modal-close svg {
@@ -976,15 +1592,17 @@ dialog::backdrop {
 }
 
 .modal-close:hover {
-  background: var(--border);
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
   color: var(--text);
 }
 
 .modal-title {
   font-size: 1.1rem;
   font-weight: 700;
+  color: var(--text-heading);
   margin-bottom: 20px;
-  padding-right: 40px;
+  padding-right: 44px;
 }
 
 /* Modal detail layout */
@@ -992,6 +1610,7 @@ dialog::backdrop {
   display: flex;
   gap: 28px;
   flex-wrap: wrap;
+  position: relative;
 }
 
 .modal-backdrop {
@@ -999,19 +1618,23 @@ dialog::backdrop {
   inset: 0;
   background-size: cover;
   background-position: center top;
-  opacity: 0.15;
-  border-radius: var(--radius-xl);
+  opacity: 0.12;
+  border-radius: var(--radius-2xl);
   pointer-events: none;
+}
+
+[data-theme="light"] .modal-backdrop {
+  opacity: 0.08;
 }
 
 .modal-poster-col {
   flex-shrink: 0;
-  width: 180px;
+  width: 190px;
 }
 
 .modal-poster {
   width: 100%;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   object-fit: cover;
   aspect-ratio: 2 / 3;
   box-shadow: var(--shadow-card);
@@ -1021,7 +1644,7 @@ dialog::backdrop {
   width: 100%;
   aspect-ratio: 2 / 3;
   background: var(--bg-elevated);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1041,19 +1664,42 @@ dialog::backdrop {
 }
 
 .modal-info-title {
-  font-size: 1.6rem;
+  font-size: 1.9rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-  margin-bottom: 10px;
-  padding-right: 40px;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  color: var(--text-heading);
+  margin-bottom: 12px;
+  padding-right: 44px;
 }
 
 .modal-meta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+/* Star ratings in modal */
+.modal-stars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #FFD700;
+}
+
+.modal-stars svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+.modal-rating-num {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FFD700;
+  margin-left: 4px;
 }
 
 .modal-badge {
@@ -1062,17 +1708,17 @@ dialog::backdrop {
   gap: 4px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 3px 10px;
+  border-radius: 99px;
+  padding: 3px 12px;
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--text-muted);
 }
 
 .modal-badge.rating {
-  background: rgba(245, 197, 24, 0.12);
-  border-color: rgba(245, 197, 24, 0.3);
-  color: #f5c518;
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.3);
+  color: #FFD700;
 }
 
 .modal-badge svg {
@@ -1083,12 +1729,12 @@ dialog::backdrop {
 .modal-plot {
   font-size: 0.9rem;
   color: var(--text-muted);
-  line-height: 1.7;
-  margin-bottom: 14px;
+  line-height: 1.75;
+  margin-bottom: 16px;
 }
 
 .modal-section-label {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -1099,7 +1745,7 @@ dialog::backdrop {
 .modal-cast {
   font-size: 0.87rem;
   color: var(--text-muted);
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .modal-actions {
@@ -1107,6 +1753,8 @@ dialog::backdrop {
   gap: 10px;
   flex-wrap: wrap;
 }
+
+
 
 /* ========= Lists modal body ========= */
 .lists-modal-body {
@@ -1120,30 +1768,34 @@ dialog::backdrop {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition);
+  width: 100%;
+  text-align: left;
 }
 
 .list-toggle-row:hover {
   border-color: var(--accent);
+  background: var(--lavender-dim);
 }
 
 .list-toggle-row.in-list {
   border-color: var(--accent);
   color: var(--accent);
+  background: var(--lavender-dim);
 }
 
 .list-check {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border: 2px solid var(--border);
-  border-radius: 4px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1166,7 +1818,100 @@ dialog::backdrop {
   font-size: 0.88rem;
   color: var(--text-muted);
   text-align: center;
-  padding: 20px 0;
+  padding: 24px 0;
+}
+
+/* =========================================
+   PROFILE / SETTINGS VIEW
+   ========================================= */
+
+.profile-view {
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.profile-section-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+}
+
+.profile-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text-muted);
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--lavender-dim);
+  border: 3px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  margin: 0 auto 16px;
+}
+
+.profile-avatar svg {
+  width: 54px;
+  height: 54px;
+}
+
+.profile-username {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.profile-email {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-link {
+  display: block;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  transition: opacity var(--transition);
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+}
+
+.settings-link:hover {
+  opacity: 0.75;
 }
 
 /* =========================================
@@ -1174,9 +1919,13 @@ dialog::backdrop {
    ========================================= */
 
 @media (max-width: 768px) {
+  :root {
+    --header-h: 60px;
+  }
+
   .app-header {
-    padding: 0 14px;
-    gap: 10px;
+    padding: 0 16px;
+    gap: 8px;
   }
 
   .brand-name {
@@ -1188,25 +1937,17 @@ dialog::backdrop {
   }
 
   .nav-btn {
-    padding: 7px 10px;
+    padding: 7px 12px;
     font-size: 0.82rem;
   }
 
   .nav-btn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .app-main {
-    padding: 14px;
-  }
-
-  .content-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 12px;
+    width: 15px;
+    height: 15px;
   }
 
   .view-toolbar {
+    padding: 12px 16px;
     flex-direction: column;
     align-items: stretch;
   }
@@ -1223,6 +1964,19 @@ dialog::backdrop {
     width: 100%;
   }
 
+  .view-body {
+    padding: 16px;
+  }
+
+  .genre-filter-bar {
+    padding: 10px 16px;
+  }
+
+  .content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+  }
+
   .lists-layout {
     flex-direction: column;
     overflow-y: auto;
@@ -1232,7 +1986,7 @@ dialog::backdrop {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border);
-    padding: 14px 16px;
+    padding: 12px 16px;
     overflow-y: visible;
   }
 
@@ -1246,10 +2000,10 @@ dialog::backdrop {
   }
 
   .lists-content {
-    padding: 14px 16px;
+    padding: 16px;
   }
 
-  .modal-inner {
+  .modal-inner-scroll {
     padding: 20px;
   }
 
@@ -1258,11 +2012,21 @@ dialog::backdrop {
   }
 
   .modal-poster-col {
-    width: 140px;
+    width: 150px;
+    margin: 0 auto;
   }
 
   .modal-info-title {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
+  }
+
+  .profile-view {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .user-dropdown {
+    right: 16px;
   }
 }
 
@@ -1276,11 +2040,11 @@ dialog::backdrop {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  padding: 12px 0 0;
+  padding: 14px 0 2px;
 }
 
 .pagination-info {
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -1295,14 +2059,14 @@ dialog::backdrop {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 34px;
-  height: 34px;
-  padding: 0 6px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition);
@@ -1336,8 +2100,8 @@ dialog::backdrop {
   align-items: center;
   justify-content: center;
   min-width: 28px;
-  height: 34px;
-  font-size: 0.85rem;
+  height: 36px;
+  font-size: 0.84rem;
   color: var(--text-dim);
   user-select: none;
 }
@@ -1360,14 +2124,14 @@ dialog::backdrop {
 
 .toast {
   position: fixed;
-  bottom: 28px;
+  bottom: 30px;
   left: 50%;
-  transform: translateX(-50%) translateY(12px);
+  transform: translateX(-50%) translateY(14px);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 20px;
-  font-size: 0.88rem;
+  border-radius: 99px;
+  padding: 10px 22px;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text);
   box-shadow: var(--shadow);
@@ -1378,7 +2142,7 @@ dialog::backdrop {
   z-index: 9999;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.22s ease, transform 0.22s var(--ease);
 }
 
 .toast.toast--visible {
@@ -1390,10 +2154,10 @@ dialog::backdrop {
   width: 15px;
   height: 15px;
   flex-shrink: 0;
-  color: var(--success);
+  color: var(--mint);
 }
 
-/* spinning state for the clear-cache button */
+/* Cache button spinning */
 .btn-refreshing svg {
   animation: spin 0.7s linear infinite;
 }
@@ -1416,5 +2180,6 @@ dialog::backdrop {
   border: 0;
 }
 
-.text-muted { color: var(--text-muted); }
+.text-muted  { color: var(--text-muted); }
 .text-accent { color: var(--accent); }
+.text-peach  { color: var(--peach); }

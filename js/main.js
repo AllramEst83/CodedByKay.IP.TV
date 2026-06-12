@@ -1,6 +1,6 @@
 /**
  * IPTV Hub — App entry point
- * PIN-based auth, view routing, shared store.
+ * PIN-based auth, view routing, theme toggle, user dropdown.
  *
  * Xtream server credentials live exclusively in Netlify env vars.
  * The client only ever stores and sends the PIN.
@@ -20,8 +20,8 @@ import {
   getItemLists   as storageGetItemLists,
 } from './storage/local.js';
 import { initModal, openListsModal } from './components/modal.js';
-import { initMoviesView, reloadMoviesView } from './views/movies.js';
-import { initSeriesView, reloadSeriesView } from './views/series.js';
+import { initMoviesView, reloadMoviesView, refreshMoviesGenres } from './views/movies.js';
+import { initSeriesView, reloadSeriesView, refreshSeriesGenres } from './views/series.js';
 import { initListsView, refreshListsView } from './views/lists.js';
 
 // ─── Shared store ─────────────────────────────────────────────────────────────
@@ -58,6 +58,42 @@ const store = {
 
 window.__iptv_store__ = store;
 
+// ─── Theme Toggle ─────────────────────────────────────────────────────────────
+
+const THEME_KEY = 'iptv-hub-theme';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(THEME_KEY, theme);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem(THEME_KEY) ?? 'dark';
+applyTheme(savedTheme);
+
+document.getElementById('theme-toggle-btn')?.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+// ─── User Dropdown ────────────────────────────────────────────────────────────
+
+const userMenuBtn  = document.getElementById('user-menu-btn');
+const userDropdown = document.getElementById('user-dropdown');
+
+userMenuBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = userDropdown.classList.toggle('is-open');
+  userMenuBtn.setAttribute('aria-expanded', String(isOpen));
+});
+
+document.addEventListener('click', () => {
+  userDropdown?.classList.remove('is-open');
+  userMenuBtn?.setAttribute('aria-expanded', 'false');
+});
+
+userDropdown?.addEventListener('click', (e) => e.stopPropagation());
+
 // ─── PIN Keypad ───────────────────────────────────────────────────────────────
 
 const MAX_PIN_LENGTH = 6;
@@ -70,11 +106,19 @@ function updatePinDisplay() {
   document.getElementById('pin-submit').disabled = pinValue.length < 1;
 }
 
+function tryAutoSubmitPin() {
+  if (pinValue.length !== MAX_PIN_LENGTH) return;
+  const btn = document.getElementById('pin-submit');
+  if (btn.disabled) return;
+  btn.click();
+}
+
 document.querySelectorAll('.key-btn[data-digit]').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (pinValue.length >= MAX_PIN_LENGTH) return;
     pinValue += btn.dataset.digit;
     updatePinDisplay();
+    tryAutoSubmitPin();
   });
 });
 
@@ -83,16 +127,31 @@ document.getElementById('pin-backspace').addEventListener('click', () => {
   updatePinDisplay();
 });
 
+// Keyboard support: type/paste on login screen
 document.addEventListener('keydown', (e) => {
   if (document.getElementById('login-screen').hidden) return;
   if (e.key >= '0' && e.key <= '9' && pinValue.length < MAX_PIN_LENGTH) {
     pinValue += e.key;
     updatePinDisplay();
+    tryAutoSubmitPin();
   } else if (e.key === 'Backspace') {
     pinValue = pinValue.slice(0, -1);
     updatePinDisplay();
   } else if (e.key === 'Enter') {
     document.getElementById('pin-submit').click();
+  }
+});
+
+// Paste support — on desktop and mobile (via clipboard API or paste event on document)
+document.addEventListener('paste', (e) => {
+  if (document.getElementById('login-screen').hidden) return;
+  const pasted = (e.clipboardData ?? window.clipboardData)?.getData('text') ?? '';
+  const digits = pasted.replace(/\D/g, '').slice(0, MAX_PIN_LENGTH);
+  if (digits.length > 0) {
+    pinValue = digits;
+    updatePinDisplay();
+    e.preventDefault();
+    tryAutoSubmitPin();
   }
 });
 
@@ -106,7 +165,7 @@ document.getElementById('pin-submit').addEventListener('click', async () => {
 
   errorEl.hidden = true;
   btn.disabled   = true;
-  label.textContent = 'Verifierar…';
+  label.textContent = 'Verifying…';
   spinner.hidden = false;
 
   try {
@@ -120,7 +179,7 @@ document.getElementById('pin-submit').addEventListener('click', async () => {
     updatePinDisplay();
   } finally {
     btn.disabled = pinValue.length < 1;
-    label.textContent = 'Logga in';
+    label.textContent = 'Sign In';
     spinner.hidden = true;
   }
 });
@@ -149,8 +208,10 @@ document.getElementById('clear-cache-btn').addEventListener('click', async () =>
   const btn = document.getElementById('clear-cache-btn');
   if (btn.disabled) return;
 
+  // Close dropdown
+  userDropdown?.classList.remove('is-open');
+
   btn.disabled = true;
-  btn.classList.add('btn-refreshing');
 
   clearApiCache();
 
@@ -159,14 +220,14 @@ document.getElementById('clear-cache-btn').addEventListener('click', async () =>
     if (_viewsInitialized.has('series')) await reloadSeriesView(store);
   } finally {
     btn.disabled = false;
-    btn.classList.remove('btn-refreshing');
-    showToast('Cache rensad — data uppdaterad');
+    showToast('Cache cleared — data refreshed');
   }
 });
 
 // ─── Logout ───────────────────────────────────────────────────────────────────
 
 document.getElementById('logout-btn').addEventListener('click', () => {
+  userDropdown?.classList.remove('is-open');
   clearApiCache();
   clearPin();
   showLoginScreen();
@@ -212,7 +273,10 @@ function startApp(pin) {
     b.classList.toggle('is-active', b.dataset.view === 'movies');
   });
 
-  initModal(pin, (item) => store.openListsModal(item));
+  initModal(pin, (item) => store.openListsModal(item), () => {
+    refreshMoviesGenres();
+    refreshSeriesGenres();
+  });
 
   if (!_viewsInitialized.has('movies')) {
     initMoviesView(pin, store);

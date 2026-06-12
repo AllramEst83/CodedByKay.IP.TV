@@ -65,15 +65,26 @@ export function createGenreFilter(containerEl, onChange) {
     }).join('');
 
     const loadingHtml = loading
-      ? `<span class="genre-loading-text" aria-live="polite">Laddar genrer… ${loadedCount}/${totalCount}</span>`
+      ? `<span class="genre-loading-text" aria-live="polite">Loading genres… ${loadedCount}/${totalCount}</span>`
       : '';
 
     const clearHtml = selected.size > 0
-      ? `<button class="genre-clear-btn" type="button" aria-label="Rensa genre-filter">✕ Rensa</button>`
+      ? `<button class="genre-clear-btn" type="button" aria-label="Clear genre filter">✕ Clear</button>`
       : '';
 
-    containerEl.innerHTML = `<div class="genre-chips">${chipsHtml}${loadingHtml}${clearHtml}</div>`;
+    containerEl.innerHTML = `
+      <button class="genre-scroll-btn genre-scroll-left" type="button" aria-label="Scroll genres left" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="genre-chips-track">
+        <div class="genre-chips">${chipsHtml}${loadingHtml}${clearHtml}</div>
+      </div>
+      <button class="genre-scroll-btn genre-scroll-right" type="button" aria-label="Scroll genres right" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    `;
 
+    // Wire up chip clicks
     containerEl.querySelectorAll('.genre-chip').forEach(btn => {
       btn.addEventListener('click', () => {
         const g = btn.dataset.genre;
@@ -89,6 +100,34 @@ export function createGenreFilter(containerEl, onChange) {
       onChange(new Set());
       render();
     });
+
+    // Wire up scroll arrows
+    const track = containerEl.querySelector('.genre-chips-track');
+    const leftBtn = containerEl.querySelector('.genre-scroll-left');
+    const rightBtn = containerEl.querySelector('.genre-scroll-right');
+
+    if (track && leftBtn && rightBtn) {
+      const SCROLL_STEP = 240;
+
+      const updateArrows = () => {
+        const canScrollLeft  = track.scrollLeft > 4;
+        const canScrollRight = track.scrollLeft < track.scrollWidth - track.clientWidth - 4;
+        leftBtn.hidden  = !canScrollLeft;
+        rightBtn.hidden = !canScrollRight;
+      };
+
+      leftBtn.addEventListener('click',  () => { track.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' }); });
+      rightBtn.addEventListener('click', () => { track.scrollBy({ left:  SCROLL_STEP, behavior: 'smooth' }); });
+      track.addEventListener('scroll', updateArrows, { passive: true });
+
+      // Use ResizeObserver so arrows update when the container resizes
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(updateArrows).observe(track);
+      }
+
+      // Initial state
+      updateArrows();
+    }
   }
 
   // ─── Public API ───────────────────────────────────────────────────────────

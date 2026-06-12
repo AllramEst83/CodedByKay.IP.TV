@@ -1,8 +1,10 @@
 /**
  * Movies (VOD) view — with pagination, search, sort, and genre filter.
+ * Genre data is populated progressively from detail modal views and
+ * persisted in localStorage — no background prefetch.
  */
 
-import { getVodCategories, getVodStreams, prefetchGenres, getGenreForItem } from '../api/xtream.js';
+import { getVodCategories, getVodStreams, getGenreForItem } from '../api/xtream.js';
 import { renderGrid, sortItems } from '../components/grid.js';
 import { initSearch, filterItems } from '../components/search.js';
 import { paginate, renderPagination, DEFAULT_PAGE_SIZE } from '../components/pagination.js';
@@ -16,16 +18,16 @@ let _sortBy     = 'name';
 let _page       = 1;
 let _pageSize   = DEFAULT_PAGE_SIZE;
 let _cleanupSearch = null;
+let _store = null;
 
 /** @type {Set<string>} */
 let _selectedGenres = new Set();
 /** @type {ReturnType<createGenreFilter>|null} */
 let _genreFilter = null;
-/** @type {AbortController|null} */
-let _prefetchAbort = null;
 
 export async function initMoviesView(pin, store) {
   _pin = pin;
+  _store = store;
 
   const categorySelect = document.getElementById('movies-category');
   const sortSelect     = document.getElementById('movies-sort');
@@ -67,7 +69,7 @@ export async function initMoviesView(pin, store) {
     renderCurrentItems(store);
   });
 
-  loadCategory('', store);
+  showPickCategoryPrompt('movies');
 }
 
 /**
@@ -90,24 +92,31 @@ export async function reloadMoviesView(store) {
   _query = '';
   searchInput.value = '';
   _page = 1;
-  await loadCategory(categorySelect.value, store);
+
+  const selected = categorySelect.value;
+  if (selected) {
+    await loadCategory(selected, store);
+  } else {
+    showPickCategoryPrompt('movies');
+  }
 }
 
 async function loadCategory(categoryId, store) {
-  // Cancel any in-flight genre prefetch for the previous category
-  if (_prefetchAbort) {
-    _prefetchAbort.abort();
-    _prefetchAbort = null;
+  if (!categoryId) {
+    showPickCategoryPrompt('movies');
+    return;
   }
 
   setLoading('movies', true);
   clearError('movies');
 
   try {
-    _allItems = await getVodStreams(_pin, categoryId);
+    let items = await getVodStreams(_pin, categoryId);
+    _allItems = items;
     _page = 1;
     _selectedGenres = new Set();
     _genreFilter?.reset();
+    syncGenreFilter();
     renderCurrentItems(store);
   } catch (err) {
     showError('movies', err.message);
@@ -115,50 +124,30 @@ async function loadCategory(categoryId, store) {
   } finally {
     setLoading('movies', false);
   }
-
-  // Kick off background genre prefetch (does not block the UI)
-  if (_allItems.length > 0) {
-    _startGenrePrefetch(store);
-  }
-}
-
-function _startGenrePrefetch(store) {
-  _prefetchAbort = new AbortController();
-  const { signal } = _prefetchAbort;
-  const snapshot = _allItems; // capture reference for this load
-
-  prefetchGenres(_pin, snapshot, 'vod', {
-    signal,
-    maxItems: 300,
-    onProgress: (loaded, total) => {
-      if (signal.aborted) return;
-      _syncGenresFromCache(snapshot);
-      _genreFilter?.setLoading(loaded < total, loaded, total);
-    },
-  }).then(() => {
-    if (!signal.aborted) {
-      _syncGenresFromCache(snapshot);
-      _genreFilter?.setLoading(false, 0, 0);
-    }
-  }).catch(() => {
-    // Prefetch cancelled or failed — leave filter with whatever was found
-  });
 }
 
 /**
- * Walk the current item list and push any newly-cached genres into the filter.
- * This is called incrementally as the prefetch progresses.
+ * Called after the detail modal closes to refresh the genre filter
+ * with any newly-discovered genre data.
  */
-function _syncGenresFromCache(items) {
+export function refreshMoviesGenres() {
+  if (_allItems.length > 0 && _genreFilter) {
+    syncGenreFilter();
+  }
+}
+
+function syncGenreFilter() {
   const found = new Set();
-  for (const item of items) {
+  for (const item of _allItems) {
     const id = item.stream_id ?? item.vod_id ?? item.id;
     const genre = getGenreForItem(id);
     if (genre) {
       for (const g of parseGenreString(genre)) found.add(g);
     }
   }
-  _genreFilter?.addGenres(found);
+  if (found.size > 0) {
+    _genreFilter?.addGenres(found);
+  }
 }
 
 function renderCurrentItems(store) {
@@ -169,9 +158,6 @@ function renderCurrentItems(store) {
   let filtered = filterItems(_allItems, _query);
   filtered = sortItems(filtered, _sortBy);
 
-  // Apply genre filter: only include items whose genre overlaps the selection.
-  // Items with no cached genre data are excluded while a filter is active so
-  // that results are accurate; they will appear once their genre is loaded.
   if (_selectedGenres.size > 0) {
     filtered = filtered.filter(item => {
       const id = item.stream_id ?? item.vod_id ?? item.id;
@@ -187,6 +173,7 @@ function renderCurrentItems(store) {
 
   renderGrid(grid, result.items, {
     onSelect:     (item) => openVodModal(item, (i) => store.getItemLists(i)),
+    onAddToList:  (item) => store.openListsModal(item),
     getListCount: (item) => store.getItemLists(item).length,
   });
 
@@ -201,15 +188,28 @@ function renderCurrentItems(store) {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function populateCategorySelect(select, categories) {
-  const allOpt = select.querySelector('option[value=""]');
   select.innerHTML = '';
-  if (allOpt) select.appendChild(allOpt);
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  placeholder.textContent = 'Pick a category…';
+  select.appendChild(placeholder);
+
   for (const cat of categories ?? []) {
     const opt = document.createElement('option');
     opt.value       = cat.category_id ?? '';
     opt.textContent = cat.category_name ?? cat.category_id;
     select.appendChild(opt);
   }
+}
+
+function showPickCategoryPrompt(prefix) {
+  document.getElementById(`${prefix}-grid`).innerHTML = '';
+  document.getElementById(`${prefix}-pagination`).innerHTML = '';
+  const el = document.getElementById(`${prefix}-empty`);
+  el.textContent = 'Pick a category to browse content.';
+  el.hidden = false;
 }
 
 function setLoading(prefix, on) {
@@ -220,12 +220,12 @@ function setLoading(prefix, on) {
 
 function showError(prefix, msg) {
   const el = document.getElementById(`${prefix}-empty`);
-  el.textContent = `Fel: ${msg}`;
+  el.textContent = `Error: ${msg}`;
   el.hidden = false;
 }
 
 function clearError(prefix) {
   const el = document.getElementById(`${prefix}-empty`);
   el.hidden = true;
-  el.textContent = 'Inget innehåll hittades.';
+  el.textContent = 'No content found.';
 }

@@ -30,7 +30,7 @@ const ALLOWED_ACTIONS = new Set([
   'get_series_info',
 ]);
 
-const TIMEOUT_MS = 15_000;
+const TIMEOUT_MS = 30_000;
 
 export default async function handler(req, context) {
   // ── 1. Method guard ────────────────────────────────────────────────────────
@@ -112,15 +112,22 @@ export default async function handler(req, context) {
       return errorResponse(502, `Leverantören svarade med status ${upstream.status}.`);
     }
 
-    const data = await upstream.json();
-
-    if (data?.user_info?.auth === 0) {
-      return errorResponse(401, 'Ogiltiga inloggningsuppgifter på servern.');
+    if (action === 'authenticate') {
+      const data = await upstream.json();
+      if (data?.user_info?.auth === 0) {
+        return errorResponse(401, 'Ogiltiga inloggningsuppgifter på servern.');
+      }
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    return new Response(JSON.stringify(data), {
+    return new Response(upstream.body, {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': upstream.headers.get('content-type') || 'application/json',
+      },
     });
   } catch (err) {
     clearTimeout(timeoutId);

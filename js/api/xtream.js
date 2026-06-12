@@ -25,9 +25,27 @@ const ENDPOINT = '/.netlify/functions/xtream';
 
 // ─── Genre cache ──────────────────────────────────────────────────────────────
 // Maps item id (string) → raw genre string (e.g. "Drama, Action").
-// Lives for the whole session; cleared together with the API cache.
+// Persisted in localStorage so genres accumulate across sessions from
+// detail modal views — no background prefetch needed.
 
-const _genreMap = new Map();
+const GENRE_STORAGE_KEY = 'iptv-hub-genres';
+
+const _genreMap = _hydrateGenreMap();
+
+function _hydrateGenreMap() {
+  try {
+    const raw = localStorage.getItem(GENRE_STORAGE_KEY);
+    if (raw) return new Map(JSON.parse(raw));
+  } catch { /* corrupted data — start fresh */ }
+  return new Map();
+}
+
+function _persistGenreMap() {
+  try {
+    const entries = [..._genreMap.entries()].slice(-2000);
+    localStorage.setItem(GENRE_STORAGE_KEY, JSON.stringify(entries));
+  } catch { /* storage full — non-critical */ }
+}
 
 /**
  * Return the cached genre string for a given item id, or null if unknown.
@@ -35,10 +53,18 @@ const _genreMap = new Map();
  * @returns {string|null}
  */
 export function getGenreForItem(itemId) {
-  return _genreMap.get(String(itemId)) ?? null;
+  return _genreMap.get(String(itemId)) || null;
 }
 
-/** Clear the in-memory genre cache. */
+/**
+ * Store a genre for an item. Called internally by getVodInfo/getSeriesInfo.
+ */
+function _setGenre(itemId, genre) {
+  _genreMap.set(String(itemId), genre);
+  _persistGenreMap();
+}
+
+/** Clear the in-memory genre cache (but keep localStorage for next session). */
 function clearGenreCache() {
   _genreMap.clear();
 }
@@ -58,19 +84,19 @@ async function callBff(payload) {
       body: JSON.stringify(payload),
     });
   } catch {
-    throw Object.assign(new Error('Nätverksfel — kunde inte nå servern.'), { status: 0 });
+    throw Object.assign(new Error('Network error — could not reach the server.'), { status: 0 });
   }
 
   let data;
   try {
     data = await res.json();
   } catch {
-    throw Object.assign(new Error(`Oväntat svar (${res.status}).`), { status: res.status });
+    throw Object.assign(new Error(`Unexpected response (${res.status}).`), { status: res.status });
   }
 
   if (!res.ok) {
     throw Object.assign(
-      new Error(data?.error ?? `Serverfel (${res.status}).`),
+      new Error(data?.error ?? `Server error (${res.status}).`),
       { status: res.status }
     );
   }
@@ -132,20 +158,25 @@ export async function getSeriesCategories(pin) {
 
 export async function getVodStreams(pin, categoryId = '') {
   const key = `vod_streams:${categoryId}`;
-  return cachedCallBff(
+  const data = await cachedCallBff(
     key,
     { pin, action: 'get_vod_streams', ...(categoryId ? { category_id: categoryId } : {}) },
     CACHE_TTL_LONG,
   );
+  // Some Xtream servers return an object or null instead of an array
+  // when no category_id is given — normalise to always return an array.
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getSeries(pin, categoryId = '') {
   const key = `series:${categoryId}`;
-  return cachedCallBff(
+  const data = await cachedCallBff(
     key,
     { pin, action: 'get_series', ...(categoryId ? { category_id: categoryId } : {}) },
     CACHE_TTL_LONG,
   );
+  // Normalise to always return an array
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getVodInfo(pin, vodId) {
@@ -156,7 +187,7 @@ export async function getVodInfo(pin, vodId) {
     CACHE_TTL_SHORT,
   );
   const genre = data?.info?.genre;
-  if (genre?.trim()) _genreMap.set(String(vodId), genre.trim());
+  if (genre?.trim()) _setGenre(vodId, genre.trim());
   return data;
 }
 
@@ -168,71 +199,7 @@ export async function getSeriesInfo(pin, seriesId) {
     CACHE_TTL_SHORT,
   );
   const genre = data?.info?.genre;
-  if (genre?.trim()) _genreMap.set(String(seriesId), genre.trim());
+  if (genre?.trim()) _setGenre(seriesId, genre.trim());
   return data;
 }
 
-// ─── Genre prefetch ───────────────────────────────────────────────────────────
-
-/**
- * Batch-prefetch genre data for a list of items in the background.
- * Fetches detail info (via the existing cached API) for items not yet in the
- * genre map, processes up to `maxItems` items, and calls `onProgress` after
- * each completed item so the caller can update the UI incrementally.
- *
- * @param {string}   pin
- * @param {object[]} items
- * @param {'vod'|'series'} type
- * @param {object}   [opts]
- * @param {number}   [opts.concurrency=5]  Parallel requests per batch
- * @param {number}   [opts.maxItems=300]   Cap on total items to process
- * @param {Function} [opts.onProgress]     Called as (loadedCount, totalCount)
- * @param {AbortSignal} [opts.signal]      Cancel signal
- */
-export async function prefetchGenres(pin, items, type, {
-  concurrency = 5,
-  maxItems = 300,
-  onProgress,
-  signal,
-} = {}) {
-  const limited = items.slice(0, maxItems);
-
-  // Skip items whose genre is already in the cache
-  const pending = limited.filter(item => {
-    const id = _itemId(item, type);
-    return id != null && !_genreMap.has(String(id));
-  });
-
-  const total = pending.length;
-  let loaded = 0;
-
-  for (let i = 0; i < pending.length; i += concurrency) {
-    if (signal?.aborted) break;
-
-    const batch = pending.slice(i, i + concurrency);
-
-    await Promise.allSettled(batch.map(async (item) => {
-      if (signal?.aborted) return;
-      const id = _itemId(item, type);
-      if (id == null) return;
-      try {
-        if (type === 'vod') await getVodInfo(pin, id);
-        else await getSeriesInfo(pin, id);
-      } catch {
-        // Ignore individual failures — the item just won't have a genre
-      }
-      loaded++;
-      onProgress?.(loaded, total);
-    }));
-
-    // Brief pause between batches to keep API load gentle
-    if (i + concurrency < pending.length && !signal?.aborted) {
-      await new Promise(r => setTimeout(r, 80));
-    }
-  }
-}
-
-function _itemId(item, type) {
-  if (type === 'vod') return item.stream_id ?? item.vod_id ?? item.id ?? null;
-  return item.series_id ?? item.id ?? null;
-}
